@@ -1,0 +1,20 @@
+{
+  "optimization": "O3",
+  "exportedFunctions": [
+    "_kiss_fft_alloc",
+    "_kiss_fft",
+    "_kiss_fftr_alloc",
+    "_kiss_fftr",
+    "_kiss_fftri",
+    "_kiss_fftnd_alloc",
+    "_kiss_fftnd",
+    "_kiss_fftndr_alloc",
+    "_kiss_fftndr",
+    "_kiss_fftndri",
+    "_malloc",
+    "_free",
+    "_kiss_fft_cleanup",
+    "_kiss_fft_next_fast_size"
+  ],
+  "useSimd": true
+}

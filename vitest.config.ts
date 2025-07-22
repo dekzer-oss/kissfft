@@ -46,8 +46,8 @@ export default defineConfig({
           environment: 'browser',
           include: ['tests/**/*.test.ts'],
           browser: {
-            enabled: true,
             provider: 'playwright',
+            enabled: true,
             headless: true,
             screenshotFailures: false,
             instances: [

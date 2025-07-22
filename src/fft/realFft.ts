@@ -1,4 +1,4 @@
-import { loadKissFft } from '@/wasm-loader';
+import { loadKissFft } from '@/loader';
 import type { KissFftRealInstance } from '@/types';
 import {
   BYTES_F32,

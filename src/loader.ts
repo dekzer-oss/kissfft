@@ -1,16 +1,9 @@
 import type { KissFftWasmModule } from './types';
-
-export const isBrowser = () =>
-  typeof window !== 'undefined' &&
-  typeof document !== 'undefined' &&
-  typeof navigator !== 'undefined';
-
+import { isBrowser } from '@/common/env';
+import { setKissFftInstance } from '@/kissfft';
 
 let modulePromise: Promise<KissFftWasmModule> | undefined;
 
-/**
- * Loads kissfft-wasm based on runtime environment (Node or browser).
- */
 export async function loadKissFft(): Promise<KissFftWasmModule> {
   if (!modulePromise) {
     if (isBrowser()) {
@@ -20,6 +13,10 @@ export async function loadKissFft(): Promise<KissFftWasmModule> {
       const { loadKissFft: loadNode } = await import('./loader.node.js');
       modulePromise = loadNode();
     }
+
+    modulePromise.then(mod => {
+      setKissFftInstance(mod);
+    });
   }
 
   return modulePromise;

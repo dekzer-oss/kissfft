@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [
     tsconfigPaths(),
     dts({
-      include: ['src'],
+      include: ['src', 'src/loader.node.ts', 'src/loader.browser.ts'],
       tsconfigPath: './tsconfig.json',
       insertTypesEntry: true,
       copyDtsFiles: true,
@@ -20,12 +20,15 @@ export default defineConfig({
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
       name: 'KissFFT',
-      fileName: (format) => `kissfft.${format}.js`,
+      fileName: 'kissfft-wasm.js',
     },
     rollupOptions: {
       external: [
-        "node:url",
-        "node:path",
+        'node:url',
+        'node:path',
+        'node:fs/promises',
+        './src/loader.node.ts',
+        './src/loader.browser.ts',
       ],
     },
     outDir: 'dist',

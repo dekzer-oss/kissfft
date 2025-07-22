@@ -22,7 +22,7 @@
   "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/kissfft.es.js",
+      "import": "./dist/kissfft.js",
       "types": "./dist/types/index.d.ts"
     },
     "./wasm": "./build/kissfft-wasm.js"
@@ -31,6 +31,8 @@
   "scripts": {
     "prebuild": "bash scripts/build-wasm.sh",
     "build": "vite build",
+    "build:wasm:simd": "jq '.useSimd = true' src/wasm/wasm.config.json > tmp && mv tmp src/wasm/wasm.config.json && bash scripts/build-wasm.sh",
+    "build:wasm:scalar": "jq '.useSimd = false' src/wasm/wasm.config.json > tmp && mv tmp src/wasm/wasm.config.json && bash scripts/build-wasm.sh",
     "dev": "vitest --watch",
     "prepare": "pnpm build",
     "test": "vitest run --reporter=verbose",

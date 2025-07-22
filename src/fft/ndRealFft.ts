@@ -1,4 +1,4 @@
-import { loadKissFft } from '@/wasm-loader';
+import { loadKissFft } from '@/loader';
 import type { KissFftNdRealInstance } from '@/types';
 import { BYTES_F32, checkAllocation, isValidPointer, safeMemoryAllocation, toF32, validateInputLength } from './utils';
 import { planCache } from './cache';

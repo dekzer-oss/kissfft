@@ -20,24 +20,32 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "dist/*"
+      ]
+    }
+  },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
+      "import": "./dist/kissfft.es.js",
       "types": "./dist/index.d.ts"
     },
     "./wasm": "./build/kissfft-wasm.js"
   },
+  "license": "BSD-3-Clause",
   "scripts": {
-    "prepare": "bash scripts/build-wasm.sh && tsc -p tsconfig.json",
-    "build": "bash scripts/build-wasm.sh && tsc",
-    "test": "vitest --reporter=verbose",
-    "bench": "vitest bench --reporter=verbose",
-    "postinstall": "npm run build",
-    "prepublishOnly": "npm run build && npm run test",
+    "prebuild": "bash scripts/build-wasm.sh",
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "prepare": "pnpm build",
+    "test": "vitest run --reporter=verbose",
+    "bench": "vitest bench",
     "format": "prettier --write ."
   },
-  "license": "BSD-3-Clause",
   "devDependencies": {
+    "typescript": "^5.8.3",
     "@types/node": "^24.0.15",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
@@ -47,8 +55,5 @@
     "vite": "^7.0.5",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
   }
 }

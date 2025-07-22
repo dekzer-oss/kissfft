@@ -16,7 +16,7 @@ export default defineConfig({
     include: ['tests/**/*.test.ts'],
     benchmark: {
       reporters: ['verbose'],
-      outputJson: 'benchmark-node.json'
+      outputJson: 'tests/__benchmarks__/benchmark-node.json'
     },
   },
 });

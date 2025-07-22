@@ -4,19 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@dekzer/kissfft': link:../../../maikel/.local/share/pnpm/global/5/node_modules/@dekzer/kissfft
-
 importers:
 
   .:
-    dependencies:
-      '@dekzer/kissfft':
-        specifier: link:../../../maikel/.local/share/pnpm/global/5/node_modules/@dekzer/kissfft
-        version: link:../../../maikel/.local/share/pnpm/global/5/node_modules/@dekzer/kissfft
-      typescript:
-        specifier: ^5.0.0
-        version: 5.8.3
     devDependencies:
       '@types/node':
         specifier: ^24.0.15
@@ -36,6 +26,9 @@ importers:
       rollup-plugin-copy:
         specifier: ^3.5.0
         version: 3.5.0
+      typescript:
+        specifier: ^5.8.3
+        version: 5.8.3
       vite:
         specifier: ^7.0.5
         version: 7.0.5(@types/node@24.0.15)

@@ -1,2 +1,0 @@
-overrides:
-  '@dekzer/kissfft': link:../../../maikel/.local/share/pnpm/global/5/node_modules/@dekzer/kissfft

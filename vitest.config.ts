@@ -22,14 +22,13 @@ export default defineConfig({
           },
         },
         test: {
-          name: 'node',
           globals: true,
           isolate: false,
+          name: 'node',
           environment: 'node',
           include: ['tests/**/*.test.ts'],
           benchmark: {
             reporters: ['verbose'],
-            outputJson: 'tests/__benchmarks__/benchmark-node.json',
           },
         },
       },
@@ -41,8 +40,8 @@ export default defineConfig({
           },
         },
         test: {
-          name: 'browser',
           globals: true,
+          name: 'browser',
           environment: 'browser',
           include: ['tests/**/*.test.ts'],
           browser: {
@@ -58,7 +57,6 @@ export default defineConfig({
           },
           benchmark: {
             reporters: ['verbose'],
-            outputJson: 'tests/__benchmarks__/benchmark-browser.json',
           },
         },
       },

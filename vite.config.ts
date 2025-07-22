@@ -20,7 +20,7 @@ export default defineConfig({
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
       name: 'KissFFT',
-      fileName: 'kissfft-wasm.js',
+      fileName: (format) => `kissfft.${format}.js`,
     },
     rollupOptions: {
       external: [

@@ -155,14 +155,14 @@ export interface KissFftRealInstance {
    * @param input - Real input array (length = N)
    * @returns Complex spectrum (length = N + 2)
    */
-  forwardReal(input: Float32Array): Float32Array;
+  forward(input: Float32Array): Float32Array;
 
   /**
    * Computes inverse FFT of complex spectrum to real output.
    * @param input - Complex spectrum (length = N + 2)
    * @returns Real output array (length = N)
    */
-  inverseReal(input: Float32Array): Float32Array;
+  inverse(input: Float32Array): Float32Array;
 
   /**
    * Releases all resources associated with this instance.
@@ -205,7 +205,7 @@ export interface KissFftNdRealInstance {
    * @param input - Real input array (length = size)
    * @returns Full complex spectrum (length = 2 × size)
    */
-  forwardNdReal(input: Float32Array): Float32Array;
+  forward(input: Float32Array): Float32Array;
 
   /**
    * Computes the inverse complex-to-real FFT, returning the original
@@ -214,7 +214,7 @@ export interface KissFftNdRealInstance {
    * @param input - Full complex spectrum (interleaved, length = 2 × size)
    * @returns Real output tensor (length = size)
    */
-  inverseNdReal(input: Float32Array): Float32Array;
+  inverse(input: Float32Array): Float32Array;
 
   /** Releases all resources associated with this instance. */
   dispose(): void;

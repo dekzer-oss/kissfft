@@ -63,12 +63,10 @@ describe('real‑FFT ‑ smoke', () => {
       const buf = new Float32Array(N);
       signal(buf);
 
-      const spec = fft.forwardReal(buf);
+      const spec = fft.forward(buf);
 
-      // DC check
       expect(spec[0] / N).toBeCloseTo(expectDC, 3);
 
-      // Optional peak check
       if (peak) {
         const { bin, min } = peak;
         const re = spec[2 * bin] / N;

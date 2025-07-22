@@ -62,7 +62,7 @@ export async function createKissNdRealFft(
     if (!isValidPointer(dimsPtr)) throw new Error('Failed to allocate dimensions buffer');
     try {
       for (let i = 0; i < nd; i++) mod.HEAP32[(dimsPtr >>> 2) + i] = shape[i];
-      invCfg = mod._kiss_fftndr_alloc(dimsPtr, nd, 1 /* inverse */, 0, 0);
+      invCfg = mod._kiss_fftndr_alloc(dimsPtr, nd, 1, 0, 0);
       checkAllocation(invCfg, 'ndr inverse plan');
       if (cache) cached!.inv = invCfg;
     } finally {
@@ -84,7 +84,7 @@ export async function createKissNdRealFft(
 
   return {
     /** Forward real → complex */
-    forwardNdReal(buf) {
+    forward(buf) {
       if (disposed) throw new Error('N‑D real FFT instance disposed');
       validateInputLength(buf, size, 'nd real forward');
 
@@ -94,7 +94,7 @@ export async function createKissNdRealFft(
     },
 
     /** Inverse complex → real (with 1/size scaling) */
-    inverseNdReal(buf) {
+    inverse(buf) {
       if (disposed) throw new Error('N‑D real FFT instance disposed');
       validateInputLength(buf, 2 * size, 'nd real inverse');
 

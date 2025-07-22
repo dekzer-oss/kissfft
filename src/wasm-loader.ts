@@ -1,23 +1,26 @@
 import type { KissFftWasmModule } from './types';
 
-/** Singleton so we never instantiate the WASM twice. */
-let modulePromise: Promise<KissFftWasmModule>;
+export const isBrowser = () =>
+  typeof window !== 'undefined' &&
+  typeof document !== 'undefined' &&
+  typeof navigator !== 'undefined';
+
+
+let modulePromise: Promise<KissFftWasmModule> | undefined;
 
 /**
- * Loads the dekzer-kissfft module.
- * @returns Promise that resolves to the KissFftWasmModule instance.
- * This function ensures that the module is loaded only once,
- * even if called multiple times.
+ * Loads kissfft-wasm based on runtime environment (Node or browser).
  */
-export function loadKissFft(): Promise<KissFftWasmModule> {
+export async function loadKissFft(): Promise<KissFftWasmModule> {
   if (!modulePromise) {
-    const spec = new URL('../build/kissfft-wasm.js', import.meta.url).href;
-    modulePromise = import(spec).then(({ default: factory }: any) => {
-      if (typeof factory !== 'function') {
-        throw new Error('kissfft-kissfft: default export is not a factory');
-      }
-      return factory() as Promise<KissFftWasmModule>;
-    });
+    if (isBrowser()) {
+      const { loadKissFft: loadBrowser } = await import('./loader.browser.js');
+      modulePromise = loadBrowser();
+    } else {
+      const { loadKissFft: loadNode } = await import('./loader.node.js');
+      modulePromise = loadNode();
+    }
   }
+
   return modulePromise;
 }

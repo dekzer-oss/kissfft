@@ -63,17 +63,17 @@ export async function createKissRealFft(
   let disposed = false;
 
   return {
-    forwardReal(input) {
+    forward(input) {
       if (disposed) throw new Error('Real FFT instance disposed');
-      validateInputLength(input, N, 'forwardReal');
+      validateInputLength(input, N, 'forward');
 
       mod.HEAPF32.set(input, inIdx);
       mod._kiss_fftr(pair!.fwd, inPtr, outPtr);
       return mod.HEAPF32.slice(outIdx, outIdx + N + 2);
     },
-    inverseReal(hspec) {
+    inverse(hspec) {
       if (disposed) throw new Error('Real FFT instance disposed');
-      validateInputLength(hspec, N + 2, 'inverseReal');
+      validateInputLength(hspec, N + 2, 'inverse');
 
       mod.HEAPF32.set(hspec, inIdx);
       mod._kiss_fftri(pair!.inv, inPtr, outPtr);

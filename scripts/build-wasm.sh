@@ -44,13 +44,16 @@ emcc "$SRC_DIR"/*.c \
   $CFLAGS $LDFLAGS \
   -s WASM=1 \
   -s MODULARIZE=1 \
+  -s EXPORT_ES6=1 \
   -s EXPORT_NAME="createKissFftModule" \
+  -s ENVIRONMENT='web,worker' \
   -s NO_FILESYSTEM=1 \
   -s ALLOW_MEMORY_GROWTH=1 \
   -s INITIAL_MEMORY=16777216 \
   -s EXPORTED_FUNCTIONS="$EXPORTED_FUNCS" \
   -s EXPORTED_RUNTIME_METHODS="$EXPORTED_RUNTIME" \
   -o "$BUILD_DIR/kissfft-wasm.js"
+
 
 # Completion message
 echo "🎉 Build finished — artifacts in $BUILD_DIR"

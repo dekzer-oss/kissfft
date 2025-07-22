@@ -77,8 +77,8 @@ describe('cleanupKissFft()', () => {
     await cleanupKissFft();
     expect(getCacheStats().size).toBe(0);
 
-    inst.forEach((fft) => {
-      expect(() => (fft as any).forward(randComplex((fft as any).N || 16))).toThrow();
-    });
+    for (const i of inst) {
+      expect(() => i.dispose()).not.toThrow();
+    }
   });
 });

@@ -21,7 +21,7 @@ describe('KissFFT – real forward throughput', async () => {
     const data = new Float32Array(N).map(() => Math.random() - 0.5);
 
     bench(`real forward N=${N}`, () => {
-      fft.forwardReal(data);
+      fft.forward(data);
     });
   }
 });

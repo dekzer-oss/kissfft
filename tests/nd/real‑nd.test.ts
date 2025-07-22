@@ -50,10 +50,10 @@ describe('N‑D real FFT – forward + inverse', () => {
 
       const src = randomReal(size, 777 + size);
 
-      const spec = fft.forwardNdReal(src);
+      const spec = fft.forward(src);
       expect(spec.length).toBe(2 * size);
 
-      const rec = fft.inverseNdReal(spec);
+      const rec = fft.inverse(spec);
       expect(rec.length).toBe(size);
       expect(relL2(src, rec)).toBeLessThan(TOL);
       fft.dispose();

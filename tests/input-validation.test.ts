@@ -5,12 +5,12 @@
  *  • Verifies helper utilities (`handleOddLengthRealFft`, `getCacheStats`)
  */
 
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 import {
-  createKissFft,
-  createKissRealFft,
-  createKissNdFft,
   cleanupKissFft,
+  createKissFft,
+  createKissNdFft,
+  createKissRealFft,
 } from '@/index';
 import { getCacheStats, handleOddLengthRealFft } from '@/fft';
 

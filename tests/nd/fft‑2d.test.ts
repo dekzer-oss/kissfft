@@ -35,7 +35,7 @@ describe('2‑D FFT (complex)', () => {
 
   it('matches NumPy reference for 2×2', async () => {
     const fft = await createKissNdFft([2, 2]);
-    const spec = fft.forwardNd(ref2x2.input);
+    const spec = fft.forward(ref2x2.input);
     expect(l2(spec, ref2x2.output)).toBeLessThan(1e-6);
     fft.dispose();
   });
@@ -46,8 +46,8 @@ describe('2‑D FFT (complex)', () => {
     const rnd = new Float32Array(size * 2).map(() => Math.random() - 0.5);
 
     const fft = await createKissNdFft(shape);
-    const spec = fft.forwardNd(rnd);
-    const rec  = fft.inverseNd(spec);
+    const spec = fft.forward(rnd);
+    const rec  = fft.inverse(spec);
 
     const err = l2(rnd, rec) / l2(rnd, new Float32Array(rnd.length));
     expect(err).toBeLessThan(1e-6);

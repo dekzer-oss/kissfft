@@ -1,76 +1,171 @@
-/**
- * Bytes per `Float32` value.
- */
-export const BYTES_F32 = 4;
+// src/fft/utils.ts
 
-/**
- * Converts a pointer to a `Float32Array` index.
- * @param ptr - The pointer to convert.
- * @returns The index in the `HEAPF32` view.
- */
+/** Size of a 32-bit float in bytes */
+export const BYTES_F32 = Float32Array.BYTES_PER_ELEMENT;
+
+/** Emscripten "nonnull" pointer check (0 == null) */
+export function isValidPointer(ptr: number): boolean {
+  return typeof ptr === 'number' && (ptr | 0) !== 0;
+}
+
+/** Convert a byte pointer to an index in HEAPF32 */
 export function toF32(ptr: number): number {
+  // Float32Array element is 4 bytes → shift right by 2
   return ptr >>> 2;
 }
 
-/**
- * Checks if a WebAssembly pointer is valid (non-zero).
- * @param ptr - The pointer to check.
- * @returns `true` if valid, `false` otherwise.
- */
-export function isValidPointer(ptr: number): boolean {
-  return ptr !== 0 && ptr !== null && ptr !== undefined;
-}
-
-/**
- * Validates a memory allocation.
- * @param ptr  - Pointer to validate.
- * @param name - Allocation name (for error reporting).
- * @returns The same pointer if valid.
- * @throws If allocation failed.
- */
-export function checkAllocation(ptr: number, name: string): number {
+/** Throw a clear error if a malloc/new plan failed */
+export function checkAllocation(ptr: number, what: string): void {
   if (!isValidPointer(ptr)) {
-    throw new Error(`Memory allocation failed for ${name}`);
-  }
-  return ptr;
-}
-
-/**
- * Safely validates multiple allocations and frees any that succeeded
- * if a later one failed.
- * @param mod         - WASM module.
- * @param allocations - Allocation records (`{ptr,size}`).
- * @throws If _any_ allocation failed.
- */
-export function safeMemoryAllocation(
-  mod: any,
-  allocations: { ptr: number; size: number }[],
-): void {
-  for (const alloc of allocations) {
-    if (!isValidPointer(alloc.ptr)) {
-      for (const prev of allocations) {
-        if (isValidPointer(prev.ptr) && prev.ptr !== alloc.ptr) {
-          mod._free(prev.ptr);
-        }
-      }
-      throw new Error(`Memory allocation failed for ${alloc.size} bytes`);
-    }
+    throw new Error(`Failed to allocate ${what}`);
   }
 }
 
 /**
- * Validates that the given `input.length` matches `expected`.
- * @param input     - Input array-like.
- * @param expected  - Expected length.
- * @param operation - Name of the operation (for error reporting).
- * @throws If the lengths differ.
+ * Validate a Float32Array length for a given call site.
+ * Keeps error messages crisp and consistent across modules.
  */
 export function validateInputLength(
-  input: ArrayLike<number>,
+  arr: Float32Array,
   expected: number,
-  operation: string,
+  label: string,
 ): void {
-  if (input.length !== expected) {
-    throw new Error(`${operation}: wrong length`);
+  if (!(arr instanceof Float32Array)) {
+    throw new Error(`${label}: expected Float32Array input`);
   }
+  if (arr.length !== expected) {
+    throw new Error(`${label}: expected length ${expected}, got ${arr.length}`);
+  }
+}
+
+/**
+ * Pads odd-length real signals by +1 sample (zero) for real-FFT plans that require even N.
+ * Even lengths are returned as-is. Provides an unpad helper (copy) back to the original length.
+ */
+export function handleOddLengthRealFft(data: Float32Array): {
+  paddedData: Float32Array;
+  originalLength: number;
+  unpadData: (result: Float32Array) => Float32Array;
+} {
+  const originalLength = data.length | 0;
+
+  // Even: identity.
+  if ((originalLength & 1) === 0) {
+    return {
+      paddedData: data,
+      originalLength,
+      unpadData: (x: Float32Array) => x,
+    };
+  }
+
+  // Odd: pad by one with a zero.
+  const paddedData = new Float32Array(originalLength + 1);
+  paddedData.set(data);
+  paddedData[originalLength] = 0;
+
+  return {
+    paddedData,
+    originalLength,
+    unpadData: (out: Float32Array) => out.slice(0, originalLength),
+  };
+}
+
+/**
+ * Maps each ND dimension through `nextFastSize` to get FFT-friendly sizes.
+ * Accepts an injected `nextFastSize` to keep this util pure/sync.
+ */
+export function nextFastShape(
+  shape: readonly number[],
+  nextFastSize: (n: number) => number | Promise<number>,
+): number[] | Promise<number[]> {
+  if (!Array.isArray(shape) || shape.length === 0) {
+    throw new Error('nextFastShape: shape must be a non-empty array');
+  }
+
+  // Support both sync and async nextFastSize without forcing async.
+  const maybePromises = shape.map((dim, i) => {
+    const d = dim | 0;
+    if (d <= 0) throw new Error(`nextFastShape: invalid dim at index ${i}: ${d}`);
+    return nextFastSize(d);
+  });
+
+  const hasPromise = maybePromises.some((v) => v instanceof Promise);
+  if (!hasPromise) {
+    return maybePromises as number[];
+  }
+  return Promise.all(maybePromises as Promise<number>[]);
+}
+
+// ----- in src/fft/utils.ts -----
+// keep your other exports above (BYTES_F32, isValidPointer, toF32, checkAllocation, etc.)
+
+/** Metadata describing one attempted allocation. */
+export interface AllocationSpec {
+  /** Non-zero pointer returned by _malloc / plan alloc. */
+  ptr: number;
+  /** Optional size in BYTES, for diagnostics only. */
+  size?: number;
+  /** Optional human label (e.g., "dims", "input", "output"). */
+  label?: string;
+}
+
+/**
+ * Ensure all allocations succeeded.
+ * If any failed, free all valid ones (best-effort) and throw once with context.
+ */
+export function safeMemoryAllocation(
+  mod: {
+    _free: (ptr: number) => void;
+  },
+  allocations: ReadonlyArray<AllocationSpec>,
+  context?: string, // ← new optional parameter
+): void {
+  const failed = allocations.find((a) => !isValidPointer(a.ptr));
+  if (!failed) return;
+
+  // Best-effort cleanup of those that did succeed
+  for (const a of allocations) {
+    if (isValidPointer(a.ptr)) {
+      try {
+        mod._free(a.ptr);
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+
+  // Nice, compact diagnostics
+  const details = allocations
+    .map((a) => {
+      const tag = a.label ? `${a.label}:` : '';
+      const ok = isValidPointer(a.ptr) ? 'ok' : 'FAIL';
+      const sz = a.size ? ` ${a.size}B` : '';
+      return `${tag}${ok}${sz}`;
+    })
+    .join(', ');
+
+  throw new Error(
+    `WASM memory allocation failed${context ? ` in ${context}` : ''} — ${details}`,
+  );
+}
+
+/** Allocate raw bytes. Does not throw; pair with `safeMemoryAllocation`. */
+export function mallocBytes(
+  mod: { _malloc: (n: number) => number },
+  bytes: number,
+  label?: string,
+): AllocationSpec {
+  const ptr = mod._malloc(bytes | 0);
+  return { ptr, size: bytes | 0, label };
+}
+
+/** Allocate Float32 storage (`len` elements). Does not throw; use `safeMemoryAllocation`. */
+export function mallocF32(
+  mod: { _malloc: (n: number) => number },
+  len: number,
+  label?: string,
+): AllocationSpec {
+  const bytes = (len | 0) * BYTES_F32;
+  const ptr = mod._malloc(bytes);
+  return { ptr, size: bytes, label };
 }

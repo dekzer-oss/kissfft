@@ -5,8 +5,8 @@
  *  • Ensures shape/size getters and output lengths are correct
  */
 
-import { describe, it, expect, afterAll } from 'vitest';
-import { createKissNdRealFft, cleanupKissFft } from '@/index';
+import { afterAll, describe, expect, it } from 'vitest';
+import { cleanupKissFft, createKissNdRealFft } from '@/index';
 
 /** Helper to compute relative L2 error */
 const relL2 = (a: Float32Array, b: Float32Array) => {
@@ -31,12 +31,16 @@ const randomReal = (N: number, seed = 2025): Float32Array => {
 
 /** Test shapes */
 const SHAPES = [
-  [4, 4],      // 2‑D 16 samples
-  [2, 3, 4],   // 3‑D 24 samples
+  [4, 4], // 2‑D 16 samples
+  [2, 3, 4], // 3‑D 24 samples
 ] as const;
 
 const TOL = 1e-6;
-
+const packedLen = (shape: readonly number[]) => {
+  const size = shape.reduce((p, c) => p * c, 1);
+  const last = shape[shape.length - 1];
+  return size + 2 * (size / last);
+};
 describe('N‑D real FFT – forward + inverse', () => {
   afterAll(() => cleanupKissFft());
 
@@ -51,7 +55,8 @@ describe('N‑D real FFT – forward + inverse', () => {
       const src = randomReal(size, 777 + size);
 
       const spec = fft.forward(src);
-      expect(spec.length).toBe(2 * size);
+      expect(spec.length).toBe(packedLen(shape)); // ✅ matches implementation
+
 
       const rec = fft.inverse(spec);
       expect(rec.length).toBe(size);

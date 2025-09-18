@@ -1,51 +1,33 @@
+// src/fft/cleanup.ts
 import { loadKissFft } from '@/loader';
-import { planCache, cleanupCache } from './cache';
+import { cleanupCache, planCache} from './cache';
+import type { KissFftWasmModule } from '@/types';
+
+type KissFftWasmModuleWithCleanup = KissFftWasmModule & {
+  _kiss_fft_cleanup: () => void;
+};
+
+function hasWasmCleanup(mod: KissFftWasmModule): mod is KissFftWasmModuleWithCleanup {
+  return (
+    typeof (mod as unknown as Record<string, unknown>)['_kiss_fft_cleanup'] === 'function'
+  );
+}
 
 /**
- * Cleans up all cached FFT plans and releases WASM resources.
- * @returns Promise when cleanup completes
+ * Frees all cached FFT plans and invokes the WASM-side cleanup if exported.
+ * Always clears the TS-side cache even if WASM is unavailable.
  */
 export async function cleanupKissFft(): Promise<void> {
   try {
     const mod = await loadKissFft();
     cleanupCache(mod);
-
-    if (mod._kiss_fft_cleanup && typeof mod._kiss_fft_cleanup === 'function') {
+    if (hasWasmCleanup(mod)) {
       mod._kiss_fft_cleanup();
     }
-  } catch (error) {
-    console.error('Error during KissFFT cleanup:', error);
+  } finally {
+    // Ensure TS-side cache is cleared even if anything threw above.
     planCache.clear();
   }
 }
 
-/**
- * Handles odd-length real FFTs by padding to even length.
- * @param data - Input data
- * @returns Padded data and unpadding function
- */
-export function handleOddLengthRealFft(data: Float32Array): {
-  paddedData: Float32Array;
-  originalLength: number;
-  unpadData: (result: Float32Array) => Float32Array;
-} {
-  const originalLength = data.length;
-
-  if (originalLength % 2 === 0) {
-    return {
-      paddedData: data,
-      originalLength,
-      unpadData: (result) => result,
-    };
-  }
-
-  const paddedData = new Float32Array(originalLength + 1);
-  paddedData.set(data);
-  paddedData[originalLength] = 0;
-
-  return {
-    paddedData,
-    originalLength,
-    unpadData: (result) => result.slice(0, originalLength),
-  };
-}
+export {getCacheStats} from './cache';

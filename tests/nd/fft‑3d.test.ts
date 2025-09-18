@@ -37,8 +37,8 @@ describe('3‑D FFT (complex)', () => {
   it('round‑trips 2×3×5 tensor ≤ 1e‑6 rel‑err', async () => {
     const fft = await createKissNdFft([...SHAPE]);
     const src = randomTensor();
-    const spec = fft.forwardNd(src);
-    const rec  = fft.inverseNd(spec);
+    const spec = fft.forward(src);
+    const rec  = fft.inverse(spec);
 
     const err = l2(src, rec) / l2(src, new Float32Array(src.length));
     expect(err).toBeLessThan(1e-6);

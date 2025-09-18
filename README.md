@@ -39,16 +39,16 @@ import {
 // 1-D complex
 const N = 1024;
 const fft = createKissFft(N);
-const x = new Float32Array(2 * N);   // [re0,im0,re1,im1,...]
-const X = fft.forward(x);            // length 2*N
-const x2 = fft.inverse(X);            // length 2*N ; includes 1/N
+const x   = new Float32Array(2 * N);   // [re0,im0,re1,im1,...]
+const X   = fft.forward(x);            // length 2*N
+const x2  = fft.inverse(X);            // length 2*N ; includes 1/N
 fft.dispose();
 
 // 1-D real (packed)
 const rfft = createKissRealFft(N);     // N must be even
-const xr = new Float32Array(N);
-const Xp = rfft.forward(xr);         // length N+2 (packed)
-const xr2 = rfft.inverse(Xp);         // length N     ; includes 1/N
+const xr   = new Float32Array(N);
+const Xp   = rfft.forward(xr);         // length N+2 (packed)
+const xr2  = rfft.inverse(Xp);         // length N     ; includes 1/N
 rfft.dispose();
 
 // Global cleanup (frees any cached WASM plans)
@@ -100,35 +100,13 @@ function packedFloats(shape: number[]) {
 ## API
 
 ```ts
-createKissFft(N
-:
-number
-):
-KissFftInstance
-createKissRealFft(N
-:
-number
-):
-KissFftRealInstance           // N must be even
-createKissNdFft(shape
-:
-number[]
-):
-KissFftNdInstance
-createKissNdRealFft(shape
-:
-number[]
-):
-KissFftNdRealInstance // last dim must be even
+createKissFft(N: number): KissFftInstance
+createKissRealFft(N: number): KissFftRealInstance           // N must be even
+createKissNdFft(shape: number[]): KissFftNdInstance
+createKissNdRealFft(shape: number[]): KissFftNdRealInstance // last dim must be even
 
-nextFastSize(n
-:
-number
-):
-number
-cleanupKissFft()
-:
-void
+nextFastSize(n: number): number
+cleanupKissFft(): void
 ```
 
 ### Instances
@@ -142,131 +120,50 @@ All instances share these guarantees:
 #### `KissFftInstance` (1-D complex)
 
 ```ts
-forward(input
-:
-Float32Array
-):
-Float32Array;                 // len 2*N
-inverse(input
-:
-Float32Array
-):
-Float32Array;                 // len 2*N
-dispose()
-:
-void;
+forward(input: Float32Array): Float32Array;                 // len 2*N
+inverse(input: Float32Array): Float32Array;                 // len 2*N
+dispose(): void;
 ```
 
 #### `KissFftRealInstance` (1-D real, packed)
 
 ```ts
-forward(input
-:
-Float32Array
-):
-Float32Array;                 // len N+2
-forward(input
-:
-Float32Array, out
-:
-Float32Array
-):
-Float32Array;
-inverse(input
-:
-Float32Array
-):
-Float32Array;                 // len N
-inverse(input
-:
-Float32Array, out
-:
-Float32Array
-):
-Float32Array;
-dispose()
-:
-void;
+forward(input: Float32Array): Float32Array;                 // len N+2
+forward(input: Float32Array, out: Float32Array): Float32Array;
+inverse(input: Float32Array): Float32Array;                 // len N
+inverse(input: Float32Array, out: Float32Array): Float32Array;
+dispose(): void;
 ```
 
 #### `KissFftNdInstance` (N-D complex)
 
 ```ts
-readonly
-shape: number[];
-readonly
-size: number;
-forward(input
-:
-Float32Array
-):
-Float32Array;                 // len 2*size
-forward(input
-:
-Float32Array, out
-:
-Float32Array
-):
-Float32Array;
-inverse(input
-:
-Float32Array
-):
-Float32Array;                 // len 2*size
-inverse(input
-:
-Float32Array, out
-:
-Float32Array
-):
-Float32Array;
-dispose()
-:
-void;
+readonly shape: number[];
+readonly size: number;
+forward(input: Float32Array): Float32Array;                 // len 2*size
+forward(input: Float32Array, out: Float32Array): Float32Array;
+inverse(input: Float32Array): Float32Array;                 // len 2*size
+inverse(input: Float32Array, out: Float32Array): Float32Array;
+dispose(): void;
 ```
 
 #### `KissFftNdRealInstance` (N-D real, packed along last dim)
 
 ```ts
-readonly
-shape: number[];
-readonly
-size: number;
-forward(input
-:
-Float32Array
-):
-Float32Array;                 // len size + 2*(size/last)
-forward(input
-:
-Float32Array, out
-:
-Float32Array
-):
-Float32Array;
-inverse(input
-:
-Float32Array
-):
-Float32Array;                 // len size
-inverse(input
-:
-Float32Array, out
-:
-Float32Array
-):
-Float32Array;
-dispose()
-:
-void;
+readonly shape: number[];
+readonly size: number;
+forward(input: Float32Array): Float32Array;                 // len size + 2*(size/last)
+forward(input: Float32Array, out: Float32Array): Float32Array;
+inverse(input: Float32Array): Float32Array;                 // len size
+inverse(input: Float32Array, out: Float32Array): Float32Array;
+dispose(): void;
 ```
 
 ---
 
 ## FFT basics (for newcomers)
 
-If you’re new to FFTs, this section is for you. It covers **when to use `forward` vs `inverse`**, and **when to pick
-real vs complex, 1-D vs N-D**.
+If you’re new to FFTs, this section is for you. It covers **when to use `forward` vs `inverse`**, and **when to pick real vs complex, 1-D vs N-D**.
 
 ### Forward vs Inverse (what do they do?)
 
@@ -275,22 +172,20 @@ real vs complex, 1-D vs N-D**.
 * **`inverse`**: converts a spectrum **back** to time/space domain.
   Use this after you’ve modified a spectrum and want the **processed signal/image** back.
 
-> In this library, all `inverse()` methods already include the correct normalization (`1/N` for 1-D, `1/size` for N-D).
-> No extra scaling needed.
+> In this library, all `inverse()` methods already include the correct normalization (`1/N` for 1-D, `1/size` for N-D). No extra scaling needed.
 
 ### Real vs Complex: which should I use?
 
-Most raw signals (audio samples, grayscale pixels) are **real-valued**. When your **inputs are real**, prefer **real FFT
-** — it’s faster and uses less memory via **Hermitian packing**.
+Most raw signals (audio samples, grayscale pixels) are **real-valued**. When your **inputs are real**, prefer **real FFT** — it’s faster and uses less memory via **Hermitian packing**.
 
 * **Real 1-D**: `createKissRealFft(N)`
 
-    * Input length: `N` (**must be even**)
-    * Output (packed): `N + 2` floats
+  * Input length: `N` (**must be even**)
+  * Output (packed): `N + 2` floats
 * **Real N-D**: `createKissNdRealFft(shape)`
 
-    * `last = shape[shape.length - 1]` **must be even**
-    * Output (packed floats): `size + 2 * (size / last)`
+  * `last = shape[shape.length - 1]` **must be even**
+  * Output (packed floats): `size + 2 * (size / last)`
 
 Use **complex FFT** when:
 
@@ -302,19 +197,19 @@ Use **complex FFT** when:
 
 * **1-D**: audio buffers, single time series.
 
-    * Real: `createKissRealFft(N)`
-    * Complex: `createKissFft(N)`
+  * Real: `createKissRealFft(N)`
+  * Complex: `createKissFft(N)`
 * **N-D**: images (2-D), volumes (3-D), tensors (k-D).
 
-    * Real: `createKissNdRealFft([H, W])`, `createKissNdRealFft([D, H, W])`, …
-    * Complex: `createKissNdFft(shape)`
+  * Real: `createKissNdRealFft([H, W])`, `createKissNdRealFft([D, H, W])`, …
+  * Complex: `createKissNdFft(shape)`
 
 > N-D real is **packed along the last dimension** only.
 
 ### Quick decision table
 
 | Task / Data                                | Use this API                  | Notes                                                    |
-|--------------------------------------------|-------------------------------|----------------------------------------------------------|
+| ------------------------------------------ | ----------------------------- | -------------------------------------------------------- |
 | Audio spectrum / EQ on mono PCM            | `createKissRealFft(N)`        | N **must be even**; spectrum length is `N+2`             |
 | Stereo PCM per-channel                     | `createKissRealFft(N)` twice  | One plan per channel or reuse the same plan sequentially |
 | 2-D image blur/sharpen (grayscale)         | `createKissNdRealFft([H, W])` | `W` **must be even** (pad if needed)                     |
@@ -330,8 +225,7 @@ Real inputs have symmetric spectra. To save space, we only store **DC..Nyquist**
 * **N-D real**: packed floats
   `packedFloats(shape) = size + 2 * (size / last)`.
 
-You can modify the packed spectrum safely in this form and call `inverse()` to get real output back. (DC and Nyquist
-bins have zero imaginary parts by symmetry—handled for you.)
+You can modify the packed spectrum safely in this form and call `inverse()` to get real output back. (DC and Nyquist bins have zero imaginary parts by symmetry—handled for you.)
 
 ### Typical workflows
 
@@ -340,9 +234,9 @@ bins have zero imaginary parts by symmetry—handled for you.)
 ```ts
 const rfft = createKissRealFft(N);
 const Xp = rfft.forward(signal);      // packed spectrum (N+2)
-const mags = new Float32Array((N >> 1) + 1);
+const mags = new Float32Array((N>>1)+1);
 for (let k = 0; k < mags.length; k++) {
-  const re = Xp[2 * k], im = Xp[2 * k + 1];
+  const re = Xp[2*k], im = Xp[2*k+1];
   mags[k] = Math.hypot(re, im);
 }
 rfft.dispose();
@@ -366,10 +260,10 @@ const FA = fft.forward(A);
 const FB = fft.forward(B);
 // multiply with conjugate if correlation
 for (let i = 0; i < FA.length; i += 2) {
-  const ar = FA[i], ai = FA[i + 1]; // conj(FA)
-  const br = FB[i], bi = FB[i + 1];
-  C[i] = ar * br + ai * bi;
-  C[i + 1] = -ar * bi + ai * br;
+  const ar = FA[i], ai = FA[i+1]; // conj(FA)
+  const br = FB[i], bi = FB[i+1];
+  C[i]   =  ar*br + ai*bi;
+  C[i+1] = -ar*bi + ai*br;
 }
 const result = fft.inverse(C);
 fft.dispose();
@@ -400,7 +294,7 @@ function spectrumDb(frame: Float32Array, sampleRate: number) {
   x.set(frame, 0);
 
   const rfft = createKissRealFft(N);
-  const Xp = rfft.forward(x);  // length N+2 (packed)
+  const Xp   = rfft.forward(x);  // length N+2 (packed)
 
   const bins = (N >> 1) + 1;
   const mags = new Float32Array(bins);
@@ -434,8 +328,8 @@ function lowPass2D(img: Float32Array, H: number, W: number, cutoffRatio: number)
   if (W % 2) throw new Error('Width must be even for ND real FFT');
 
   const shape = [H, W];
-  const size = H * W;
-  const fft = createKissNdRealFft(shape);
+  const size  = H * W;
+  const fft   = createKissNdRealFft(shape);
 
   // forward (packed along last dim)
   const spec = fft.forward(img); // length = size + 2 * (size / W)
@@ -443,9 +337,9 @@ function lowPass2D(img: Float32Array, H: number, W: number, cutoffRatio: number)
   // zero out high frequencies in-place:
   // keep frequencies where |u|/W < cutoffRatio and |v|/H < cutoffRatio
   const lines = size / W;           // number of rows
-  const half = (W >> 1) + 1;       // bins along last dim in packed form
-  const cx = cutoffRatio * half; // cutoff in packed bins
-  const cy = cutoffRatio * (H / 2);
+  const half  = (W >> 1) + 1;       // bins along last dim in packed form
+  const cx    = cutoffRatio * half; // cutoff in packed bins
+  const cy    = cutoffRatio * (H / 2);
 
   for (let row = 0; row < lines; row++) {
     // vertical distance from DC
@@ -471,8 +365,7 @@ function lowPass2D(img: Float32Array, H: number, W: number, cutoffRatio: number)
 
 **Notes**
 
-* The packed layout collapses conjugate symmetry along the **last** dimension (`W`), so we filter in that coordinate
-  system.
+* The packed layout collapses conjugate symmetry along the **last** dimension (`W`), so we filter in that coordinate system.
 * If your source width is odd, pad a column before transforming (or use complex ND).
 
 ---
@@ -488,7 +381,7 @@ function correlate3D(
   B: Float32Array,  // complex interleaved len 2 * size
   shape: [number, number, number]
 ) {
-  const size = shape[0] * shape[1] * shape[2];
+  const size  = shape[0] * shape[1] * shape[2];
   if (A.length !== 2 * size || B.length !== 2 * size) {
     throw new Error('Expected interleaved length = 2 * size');
   }
@@ -502,8 +395,8 @@ function correlate3D(
   for (let i = 0; i < 2 * size; i += 2) {
     const are = FA[i + 0], aim = FA[i + 1];
     const bre = FB[i + 0], bim = FB[i + 1];
-    C[i + 0] = are * bre + aim * bim; // (a - i b) * (c + i d) real
-    C[i + 1] = -are * bim + aim * bre; // imag
+    C[i + 0] =  are * bre +  aim * bim; // (a - i b) * (c + i d) real
+    C[i + 1] = -are * bim +  aim * bre; // imag
   }
 
   // inverse (includes 1/size normalization)
@@ -550,27 +443,27 @@ Internally, the WASM module provides the canonical KISS FFT C interfaces:
 
 * 1-D complex:
 
-    * `_kiss_fft_alloc(nfft, inverse_fft, mem, lenmem)`
-    * `_kiss_fft(cfg, fin, fout)`
+  * `_kiss_fft_alloc(nfft, inverse_fft, mem, lenmem)`
+  * `_kiss_fft(cfg, fin, fout)`
 * 1-D real:
 
-    * `_kiss_fftr_alloc(nfft, inverse_fft, mem, lenmem)`
-    * `_kiss_fftr(cfg, timedata, freqdata)`       // real → complex (packed)
-    * `_kiss_fftri(cfg, freqdata, timedata)`      // complex (packed) → real
+  * `_kiss_fftr_alloc(nfft, inverse_fft, mem, lenmem)`
+  * `_kiss_fftr(cfg, timedata, freqdata)`       // real → complex (packed)
+  * `_kiss_fftri(cfg, freqdata, timedata)`      // complex (packed) → real
 * N-D complex:
 
-    * `_kiss_fftnd_alloc(dimsPtr, ndims, inverse_fft, mem, lenmem)`
-    * `_kiss_fftnd(cfg, fin, fout)`
+  * `_kiss_fftnd_alloc(dimsPtr, ndims, inverse_fft, mem, lenmem)`
+  * `_kiss_fftnd(cfg, fin, fout)`
 * N-D real (packed along last dimension):
 
-    * `_kiss_fftndr_alloc(dimsPtr, ndims, inverse_fft, mem, lenmem)`
-    * `_kiss_fftndr(cfg, fin, fout)`              // real → complex (packed)
-    * `_kiss_fftndri(cfg, freqdata, timedata)`    // complex (packed) → real
+  * `_kiss_fftndr_alloc(dimsPtr, ndims, inverse_fft, mem, lenmem)`
+  * `_kiss_fftndr(cfg, fin, fout)`              // real → complex (packed)
+  * `_kiss_fftndri(cfg, freqdata, timedata)`    // complex (packed) → real
 * Housekeeping:
 
-    * `_kiss_fft_next_fast_size(n)`
-    * `_kiss_fft_cleanup()`
-    * `_malloc(size)`, `_free(ptr)`
+  * `_kiss_fft_next_fast_size(n)`
+  * `_kiss_fft_cleanup()`
+  * `_malloc(size)`, `_free(ptr)`
 
 You never call these directly—the factory functions above wrap them with safe typed arrays and buffer-size checks.
 
@@ -582,8 +475,7 @@ You never call these directly—the factory functions above wrap them with safe 
 * **Preallocate out-buffers** for zero-GC loops (see streaming example).
 * **Choose friendly sizes** with `nextFastSize()` (especially for real-time).
 * **Pad to even** for real transforms (1-D `N`, or N-D `last` dim).
-* **Call `dispose()`** on instances you’re done with; also use `cleanupKissFft()` when you want to flush all cached
-  plans.
+* **Call `dispose()`** on instances you’re done with; also use `cleanupKissFft()` when you want to flush all cached plans.
 
 ---
 

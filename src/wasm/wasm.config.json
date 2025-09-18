@@ -4,6 +4,7 @@
   "singleFile": false,
   "initialMemory": 16777216,
   "environments": "web,worker,node",
+  "ALLOW_MEMORY_GROWTH": 1,
   "exportedFunctions": [
     "_kiss_fft_alloc",
     "_kiss_fft",
@@ -15,8 +16,8 @@
     "_kiss_fftndr_alloc",
     "_kiss_fftndr",
     "_kiss_fftndri",
-    "_kiss_fft_cleanup",
     "_kiss_fft_next_fast_size",
+    "_kiss_fft_cleanup",
     "_malloc",
     "_free"
   ]

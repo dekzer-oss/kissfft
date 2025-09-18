@@ -71,17 +71,31 @@ export async function createKissRealFft(
       mod._kiss_fftr(pair!.fwd, inPtr, outPtr);
       return mod.HEAPF32.slice(outIdx, outIdx + N + 2);
     },
-    inverse(hspec) {
+    /**
+     * Complex (packed) → Real.
+     * Accepts a Hermitian-packed spectrum (length = N + 2) and returns real time-domain
+     * samples (length = N). Output is normalized by 1/N.
+     */
+    inverse(hspec: Float32Array): Float32Array {
       if (disposed) throw new Error('Real FFT instance disposed');
       validateInputLength(hspec, N + 2, 'inverse');
 
-      mod.HEAPF32.set(hspec, inIdx);
-      mod._kiss_fftri(pair!.inv, inPtr, outPtr);
+      // Write the packed spectrum into the PACKED region (outIdx),
+      // compute the real output into the REAL region (inIdx).
+      mod.HEAPF32.set(hspec, outIdx);
+      mod._kiss_fftri(
+        pair!.inv,   // inverse plan (real)
+        outPtr,      // freqdata: PACKED buffer (N + 2 floats)
+        inPtr,       // timedata: REAL buffer (N floats)
+      );
 
+      // Read back real data and apply 1/N normalization.
+      const view = mod.HEAPF32.subarray(inIdx, inIdx + N);
       const out = new Float32Array(N);
-      for (let i = 0; i < N; i++) out[i] = mod.HEAPF32[outIdx + i] * invN;
+      for (let i = 0; i < N; i++) out[i] = view[i] * invN;
       return out;
     },
+
     dispose() {
       if (disposed) return;
       disposed = true;

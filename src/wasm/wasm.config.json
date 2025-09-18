@@ -1,5 +1,9 @@
 {
   "optimization": "O3",
+  "useSimd": true,
+  "singleFile": false,
+  "initialMemory": 16777216,
+  "environments": "web,worker,node",
   "exportedFunctions": [
     "_kiss_fft_alloc",
     "_kiss_fft",
@@ -11,10 +15,9 @@
     "_kiss_fftndr_alloc",
     "_kiss_fftndr",
     "_kiss_fftndri",
-    "_malloc",
-    "_free",
     "_kiss_fft_cleanup",
-    "_kiss_fft_next_fast_size"
-  ],
-  "useSimd": true
+    "_kiss_fft_next_fast_size",
+    "_malloc",
+    "_free"
+  ]
 }

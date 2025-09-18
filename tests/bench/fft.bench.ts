@@ -1,4 +1,4 @@
-import { bench, describe, beforeAll, afterAll } from 'vitest';
+import { bench, beforeAll, afterAll } from 'vitest';
 import { createKissFft, cleanupKissFft } from '@/index';
 
 const SIZES = [64, 256, 1024, 4096];

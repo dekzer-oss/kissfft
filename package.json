@@ -18,19 +18,21 @@
     "type": "git",
     "url": "https://github.com/dekzer-oss/kissfft.git"
   },
-  "main": "./dist/index.js",
+  "main": "./dist/kissfft.es.js",
   "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/kissfft.js",
+      "import": "./dist/kissfft.es.js",
       "types": "./dist/types/index.d.ts"
     },
+    "./loader.node": "./dist/loader.node.js",
+    "./loader.browser": "./dist/loader.browser.js",
     "./wasm": "./build/kissfft-wasm.js"
   },
   "license": "BSD-3-Clause",
   "scripts": {
     "prebuild": "bash scripts/build-wasm.sh",
-    "build": "vite build",
+    "build": "vite build -c vite.es.config.ts && vite build -c vite.umd.config.ts",
     "build:wasm:simd": "jq '.useSimd = true' src/wasm/wasm.config.json > tmp && mv tmp src/wasm/wasm.config.json && bash scripts/build-wasm.sh",
     "build:wasm:scalar": "jq '.useSimd = false' src/wasm/wasm.config.json > tmp && mv tmp src/wasm/wasm.config.json && bash scripts/build-wasm.sh",
     "dev": "vitest --watch",

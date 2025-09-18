@@ -1,6 +1,6 @@
 // tests/bench/simd-stress.bench.ts
 import { bench, describe } from 'vitest'
-import type { KissFftWasmModule } from '../../src/types'
+import type { KissFftWasmModule } from '../../src'
 import { loadKissFft } from '../../src/loader';
 
 let wasm: KissFftWasmModule

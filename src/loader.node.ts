@@ -8,8 +8,8 @@ const jsPath = '../build/kissfft-wasm.js';
 
 export async function loadKissFft() {
   const wasmBinary = await readFile(wasmPath);
-  const { default: createKissFftModule } = await import(jsPath) ;
-  return await createKissFftModule({
+  const { default: createModule } = await import(jsPath) ;
+  return await createModule({
     wasmBinary
   });
 }

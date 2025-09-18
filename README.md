@@ -490,4 +490,9 @@ pnpm bench
 
 ## License
 
-KISS FFT is BSD-licensed (see upstream). This wrapper is MIT.
+This wrapper/bindings code is MIT © 2025 Maikel Eckelboom.
+
+This package includes KISS FFT (https://github.com/mborgerding/kissfft),
+licensed under the BSD 3-Clause. See
+`THIRD_PARTY_LICENSES/KISSFFT-BSD-3-Clause.txt` and the top-level `NOTICE`
+for details. This project is not affiliated with or endorsed by KISS FFT.

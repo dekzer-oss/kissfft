@@ -2,12 +2,11 @@ import { defineConfig } from 'vite';
 import path from 'node:path';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-// Same externals as ESM — but force single-chunk UMD.
 const externalPredicate = (id: string) => {
   if (id.startsWith('node:')) return true;
   if (id === 'fs' || id === 'path' || id === 'url' || id === 'module') return true;
-  if (id.includes('loader.node')) return true;
-  return false;
+  return id.includes('loader.node');
+
 };
 
 export default defineConfig({
@@ -31,7 +30,11 @@ export default defineConfig({
         if (warning.code === 'MISSING_GLOBAL_NAME') return;
         defaultHandler(warning);
       },
+      treeshake: {
+        moduleSideEffects: false
+      },
       output: {
+        inlineDynamicImports: true,
         globals: {
           fs: 'fs',
           path: 'path',
@@ -42,14 +45,14 @@ export default defineConfig({
           'node:url': 'node_url',
           'node:module': 'module',
         },
-        // ✅ UMD must be a single file: no code-splitting allowed.
-        inlineDynamicImports: true,
+        banner:
+          `@dekzer/kissfft
+Includes KISS FFT (c) 2003–2010 Mark Borgerding, BSD-3-Clause.
+Wrapper (c) 2025 Maikel Eckelboom, MIT. See NOTICE and THIRD_PARTY_LICENSES.`,
       },
-      treeshake: { moduleSideEffects: false },
     },
-
     outDir: 'dist',
     target: 'esnext',
-    emptyOutDir: false, // keep ESM output
+    emptyOutDir: false,
   },
 });

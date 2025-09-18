@@ -1,0 +1,13 @@
+@dekzer/kissfft — NOTICE
+
+This package includes code from KISS FFT
+Copyright (c) 2003–2010 Mark Borgerding.
+License: BSD-3-Clause.
+
+The KISS FFT license text is provided in:
+THIRD_PARTY_LICENSES/KISSFFT-BSD-3-Clause.txt
+
+No endorsement by the KISS FFT authors is implied.
+This project is not affiliated with or endorsed by the KISS FFT project.
+
+© 2025 Maikel Eckelboom — MIT License for all original wrapper/bindings code.

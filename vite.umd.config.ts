@@ -6,7 +6,6 @@ const externalPredicate = (id: string) => {
   if (id.startsWith('node:')) return true;
   if (id === 'fs' || id === 'path' || id === 'url' || id === 'module') return true;
   return id.includes('loader.node');
-
 };
 
 export default defineConfig({
@@ -30,9 +29,7 @@ export default defineConfig({
         if (warning.code === 'MISSING_GLOBAL_NAME') return;
         defaultHandler(warning);
       },
-      treeshake: {
-        moduleSideEffects: false
-      },
+      treeshake: { moduleSideEffects: false },
       output: {
         inlineDynamicImports: true,
         globals: {
@@ -45,14 +42,17 @@ export default defineConfig({
           'node:url': 'node_url',
           'node:module': 'module',
         },
-        banner:
-          `@dekzer/kissfft
-Includes KISS FFT (c) 2003–2010 Mark Borgerding, BSD-3-Clause.
-Wrapper (c) 2025 Maikel Eckelboom, MIT. See NOTICE and THIRD_PARTY_LICENSES.`,
+        // ★ Wrap banner in a proper JS comment:
+        banner: `/*!
+ * @dekzer/kissfft
+ * Includes KISS FFT (c) 2003–2010 Mark Borgerding, BSD-3-Clause.
+ * Wrapper (c) 2025 Maikel Eckelboom, MIT. See NOTICE and THIRD_PARTY_LICENSES.
+ */`,
       },
     },
+
     outDir: 'dist',
     target: 'esnext',
-    emptyOutDir: false,
+    emptyOutDir: false, // keep ESM artifacts from the first build
   },
 });

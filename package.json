@@ -22,12 +22,18 @@
   "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/kissfft.es.js",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/kissfft.es.js"
     },
-    "./loader.node": "./dist/loader.node.js",
-    "./loader.browser": "./dist/loader.browser.js",
-    "./wasm": "./build/kissfft-wasm.js"
+    "./loader.browser": {
+      "types": "./dist/types/loader.browser.d.ts",
+      "import": "./dist/loader.browser.js"
+    },
+    "./loader.node": {
+      "types": "./dist/types/loader.node.d.ts",
+      "import": "./dist/loader.node.js",
+      "require": "./dist/loader.node.js"
+    }
   },
   "license": "MIT AND BSD-3-Clause",
   "files": [

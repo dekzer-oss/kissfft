@@ -57,7 +57,6 @@ describe('N‑D real FFT – forward + inverse', () => {
       const spec = fft.forward(src);
       expect(spec.length).toBe(packedLen(shape)); // ✅ matches implementation
 
-
       const rec = fft.inverse(spec);
       expect(rec.length).toBe(size);
       expect(relL2(src, rec)).toBeLessThan(TOL);

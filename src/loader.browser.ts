@@ -7,7 +7,7 @@ let modulePromise: Promise<KissFftWasmModule> | undefined;
 export function loadKissFft(): Promise<KissFftWasmModule> {
   if (!modulePromise) {
     modulePromise = createModule({
-      locateFile: (file:string) => (file.endsWith('.wasm') ? wasmUrl : file),
+      locateFile: (file: string) => (file.endsWith('.wasm') ? wasmUrl : file),
     }) as Promise<KissFftWasmModule>;
   }
   return modulePromise;

@@ -8,8 +8,8 @@
 
 import { createKissRealFft } from '@/fft';
 
-const N = 16;                 // micro‑size for smoke tests
-const EPS = 1e-3;             // loose tolerance — just a canary
+const N = 16; // micro‑size for smoke tests
+const EPS = 1e-3; // loose tolerance — just a canary
 
 /** Helper: magnitude (size) of a single complex bin */
 const mag = (re: number, im: number) => Math.hypot(re, im);
@@ -26,17 +26,24 @@ describe('real‑FFT ‑ smoke', () => {
   const cases = [
     {
       name: 'DC 1.0',
-      signal(dst: Float32Array) { dst.fill(1); },
+      signal(dst: Float32Array) {
+        dst.fill(1);
+      },
       expectDC: 1,
     },
     {
       name: 'Impulse',
-      signal(dst: Float32Array) { dst.fill(0); dst[0] = 1; },
+      signal(dst: Float32Array) {
+        dst.fill(0);
+        dst[0] = 1;
+      },
       expectDC: 1 / N,
     },
     {
       name: 'Silence',
-      signal(dst: Float32Array) { dst.fill(0); },
+      signal(dst: Float32Array) {
+        dst.fill(0);
+      },
       expectDC: 0,
     },
     {

@@ -1,17 +1,20 @@
-import { readFile } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-import type { KissFftWasmModule } from './types';
+
+// Emscripten ES module factory (MODULARIZE + EXPORT_ES6)
+import createModule from '../build/kissfft-wasm.js';
+import type { KissFftWasmModule } from '@/types';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const wasmPath = resolve(__dirname, '../build/kissfft-wasm.wasm');
+const wasmBinary = readFileSync(wasmPath);
 
-export async function loadKissFft(): Promise<KissFftWasmModule> {
-  const wasmPath = resolve(__dirname, '../build/kissfft-wasm.wasm');
-  const jsPath   = resolve(__dirname, '../build/kissfft-wasm.js');
-
-  const wasmBinary = await readFile(wasmPath);
-  const { default: createModule } = await import(pathToFileURL(jsPath).href);
-
-  const mod: KissFftWasmModule = await createModule({ wasmBinary });
-  return mod;
+export function loadKissFft(): Promise<KissFftWasmModule> {
+  return createModule({
+    wasmBinary,
+    locateFile: (p: string) => (p.endsWith('.wasm') ? wasmPath : p),
+  }) as unknown as Promise<KissFftWasmModule>;
 }
+
+export default loadKissFft;

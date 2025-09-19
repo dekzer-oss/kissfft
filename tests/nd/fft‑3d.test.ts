@@ -20,7 +20,7 @@ const l2 = (a: Float32Array, b: Float32Array) => {
 
 /** Shape  =  2 × 3 × 5  (size = 30) */
 const SHAPE = [2, 3, 5] as const;
-const SIZE  = SHAPE[0] * SHAPE[1] * SHAPE[2];
+const SIZE = SHAPE[0] * SHAPE[1] * SHAPE[2];
 
 /** Deterministic random complex tensor */
 const randomTensor = () => {
@@ -38,7 +38,7 @@ describe('3‑D FFT (complex)', () => {
     const fft = await createKissNdFft([...SHAPE]);
     const src = randomTensor();
     const spec = fft.forward(src);
-    const rec  = fft.inverse(spec);
+    const rec = fft.inverse(spec);
 
     const err = l2(src, rec) / l2(src, new Float32Array(src.length));
     expect(err).toBeLessThan(1e-6);

@@ -9,7 +9,6 @@
     "signal processing",
     "kissfft"
   ],
-  "type": "module",
   "homepage": "https://github.com/dekzer-oss/kissfft#readme",
   "bugs": {
     "url": "https://github.com/dekzer-oss/kissfft/issues"
@@ -18,21 +17,31 @@
     "type": "git",
     "url": "https://github.com/dekzer-oss/kissfft.git"
   },
-  "main": "./dist/kissfft.es.js",
+  "license": "MIT AND BSD-3-Clause",
+  "type": "module",
+  "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/kissfft.es.js",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./loader": {
+      "node": "./dist/loader.node.js",
+      "worker": "./dist/loader.browser.js",
+      "browser": "./dist/loader.browser.js",
+      "default": "./dist/loader.browser.js"
     },
     "./loader.node": "./dist/loader.node.js",
     "./loader.browser": "./dist/loader.browser.js",
-    "./wasm": "./build/kissfft-wasm.js"
+    "./umd": "./dist/kissfft.umd.cjs"
   },
-  "license": "MIT AND BSD-3-Clause",
   "files": [
-    "dist/",
-    "build/",
+    "dist/**",
+    "build/kissfft-wasm.js",
+    "build/kissfft-wasm.wasm",
+    "README.md",
     "LICENSE",
     "NOTICE",
     "UPSTREAM.md",
@@ -40,7 +49,10 @@
   ],
   "scripts": {
     "prebuild": "bash scripts/build-wasm.sh",
-    "build": "vite build -c vite.es.config.ts && vite build -c vite.umd.config.ts",
+    "build": "pnpm run build:es && pnpm run build:node && pnpm run build:umd",
+    "build:es": "vite build -c vite.es.config.ts",
+    "build:node": "vite build -c vite.node.config.ts",
+    "build:umd": "vite build -c vite.umd.config.ts",
     "prepack": "pnpm run build",
     "build:wasm:simd": "jq '.useSimd = true' src/wasm/wasm.config.json > tmp && mv tmp src/wasm/wasm.config.json && bash scripts/build-wasm.sh",
     "build:wasm:scalar": "jq '.useSimd = false' src/wasm/wasm.config.json > tmp && mv tmp src/wasm/wasm.config.json && bash scripts/build-wasm.sh",

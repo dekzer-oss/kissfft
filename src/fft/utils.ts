@@ -1,5 +1,3 @@
-// src/fft/utils.ts
-
 /** Size of a 32-bit float in bytes */
 export const BYTES_F32 = Float32Array.BYTES_PER_ELEMENT;
 

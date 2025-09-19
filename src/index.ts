@@ -1,6 +1,3 @@
-// export { loadKissFft as loadKissFftBrowser } from './loader.browser';
-// export { loadKissFft as loadKissFftNode } from './loader.node';
-
 export {
   createKissFft,
   createKissRealFft,

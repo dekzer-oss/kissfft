@@ -38,7 +38,7 @@ describe('complex‑FFT – smoke', () => {
     src[0] = 1;
 
     const spec = fft.forward(src);
-    const rec  = fft.inverse(spec);
+    const rec = fft.inverse(spec);
 
     expect(rec[0]).toBeCloseTo(1, 7);
     for (let i = 1; i < 2 * N; i++) {
@@ -47,14 +47,15 @@ describe('complex‑FFT – smoke', () => {
   });
 
   it('round‑trips random complex input (≤1 e‑6 relative error)', () => {
-    const input     = randomComplex();
-    const spectrum  = fft.forward(input);
+    const input = randomComplex();
+    const spectrum = fft.forward(input);
     const recovered = fft.inverse(spectrum);
 
-    let num = 0, denom = 0;
+    let num = 0,
+      denom = 0;
     for (let i = 0; i < input.length; i++) {
       const d = input[i] - recovered[i];
-      num   += d * d;
+      num += d * d;
       denom += input[i] * input[i];
     }
     const relErr = Math.sqrt(num / denom);

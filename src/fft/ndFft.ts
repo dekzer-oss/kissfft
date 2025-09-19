@@ -1,4 +1,3 @@
-// src/fft/ndFft.ts
 import { loadKissFft } from '@/loader';
 import type { KissFftNdInstance } from '@/types';
 import {

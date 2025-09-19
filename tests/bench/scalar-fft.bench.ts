@@ -4,7 +4,6 @@ import { bench, describe } from 'vitest';
 const sizes = [64, 256, 1024, 4096];
 
 describe('KissFFT – complex forward throughput', () => {
-
   for (const N of sizes) {
     let fft: Awaited<ReturnType<typeof createKissFft>>;
     let buf: Float32Array;

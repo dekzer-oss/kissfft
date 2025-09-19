@@ -11,13 +11,16 @@ import { createKissNdFft, cleanupKissFft } from '@/index';
 /** Reference 2×2 DFT (computed via NumPy) */
 const ref2x2 = {
   input: new Float32Array([
-    1, 0, 2, 0, // row 0: 1+0j, 2+0j
-    3, 0, 4, 0, // row 1: 3+0j, 4+0j
+    1,
+    0,
+    2,
+    0, // row 0: 1+0j, 2+0j
+    3,
+    0,
+    4,
+    0, // row 1: 3+0j, 4+0j
   ]),
-  output: new Float32Array([
-    10, 0,  -2, 0,
-    -4, 0,   0, 0,
-  ]),
+  output: new Float32Array([10, 0, -2, 0, -4, 0, 0, 0]),
 };
 
 /** Simple helper: L2‑norm */
@@ -47,7 +50,7 @@ describe('2‑D FFT (complex)', () => {
 
     const fft = await createKissNdFft(shape);
     const spec = fft.forward(rnd);
-    const rec  = fft.inverse(spec);
+    const rec = fft.inverse(spec);
 
     const err = l2(rnd, rec) / l2(rnd, new Float32Array(rnd.length));
     expect(err).toBeLessThan(1e-6);

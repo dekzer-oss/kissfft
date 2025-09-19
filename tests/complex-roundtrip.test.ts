@@ -39,6 +39,7 @@ const TOL = 1e-6;
 
 describe(
   'complex FFT – round‑trip accuracy',
+  { timeout: 20000 },
   () => {
     afterAll(() => cleanupKissFft());
 
@@ -72,6 +73,5 @@ describe(
         });
       },
     );
-  },
-  { timeout: 0 },
+  }
 );

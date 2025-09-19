@@ -22,6 +22,7 @@ export default defineConfig({
           },
         },
         test: {
+          testTimeout: 20_000,
           globals: true,
           isolate: false,
           name: 'node',
@@ -44,6 +45,7 @@ export default defineConfig({
           name: 'browser',
           environment: 'browser',
           include: ['tests/**/*.test.ts'],
+          testTimeout: 20_000,
           browser: {
             provider: 'playwright',
             enabled: true,

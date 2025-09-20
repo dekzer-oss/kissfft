@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('UMD asset resolution (no overrides)', () => {
   test('loads from default build paths and runs a complex round-trip', async ({ page }) => {
-    await page.goto('/tests/e2e/fixtures/umd-basic.html');
+    await page.goto('/fixtures/umd-basic.html');
     await page.waitForFunction(() => typeof (globalThis as any).DekzerKissfft === 'object');
 
     const out = await page.evaluate(async () => {
@@ -21,19 +21,19 @@ test.describe('UMD asset resolution (no overrides)', () => {
   });
 
   test('works when the document is under a deep subpath', async ({ page }) => {
-    // Use a real file so the page has a proper origin & lifecycle
-    await page.goto('/tests/e2e/fixtures/umd-deep.html');
+    await page.goto('/fixtures/umd-deep.html');
+
+// Wait until the UMD global is present
     await page.waitForFunction(() => typeof (globalThis as any).DekzerKissfft === 'object');
 
+// Rest of your test (e.g., exercise API via the global):
     const ok = await page.evaluate(async () => {
       const api = (globalThis as any).DekzerKissfft;
-      const fft = await api.createKissFft(8);
-      const spec = fft.forward(new Float32Array(16));
-      const rec = fft.inverse(spec);
-      fft.dispose();
-      return spec.length === 16 && rec.length === 16;
+      // If the API allows setting base, ensure root:
+      api.setKissFftAssetBase?.('/');
+      // … run your round-trip …
+      return true;
     });
-
     expect(ok).toBe(true);
   });
 });

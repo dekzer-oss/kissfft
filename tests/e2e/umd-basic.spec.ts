@@ -19,7 +19,7 @@ type EvalResult = {
 };
 
 test('loads UMD and does a complex round-trip (implies WASM ran)', async ({ page }) => {
-  await page.goto('/tests/e2e/fixtures/umd-basic.html');
+  await page.goto('/fixtures/umd-basic.html');
 
   // Wait until UMD global is actually initialized (avoid races)
   await page.waitForFunction(() => {
@@ -33,7 +33,8 @@ test('loads UMD and does a complex round-trip (implies WASM ran)', async ({ page
     if (!api) throw new Error('UMD global missing');
 
     // Deterministic asset location for the test: siblings of the UMD bundle.
-    api.setKissFftAssetBase?.('/dist/');
+    // api.setKissFftAssetBase?.('/dist/');
+    api.setKissFftAssetBase?.('/');
 
     const N = 16;
     const plan = await api.createKissFft(N);

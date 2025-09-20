@@ -1,28 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const TEST_DIR = resolve(__dirname, 'tests/e2e');
-const PORT = 4178;
 
 export default defineConfig({
-  testDir: TEST_DIR,
-  testMatch: ['**/*.spec.ts'], // or narrow: ['**/*.pw.spec.ts'] if you rename
-  fullyParallel: true,
-  retries: process.env.CI ? 2 : 0,
-  timeout: 45_000,
-  reporter: [['list']],
+  testDir: 'tests/e2e',
+  timeout: 30_000,
 
   use: {
-    baseURL: `http://127.0.0.1:${PORT}`,
-  },
-
-  webServer: {
-    command: `node ${resolve(TEST_DIR, 'serve.mjs')}`,
-    url: `http://127.0.0.1:${PORT}`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 30_000,
+    baseURL: 'http://127.0.0.1:4178',
+    trace: 'on-first-retry',
   },
 
   projects: [
@@ -30,4 +14,17 @@ export default defineConfig({
     { name: 'firefox',  use: { ...devices['Desktop Firefox'] } },
     { name: 'webkit',   use: { ...devices['Desktop Safari'] } },
   ],
+
+  webServer: {
+    // Build the library, then preview the built "dist/" at "/"
+    command: 'pnpm run preview:e2e',
+    // Point to a guaranteed 200 page so Playwright knows it's ready:
+    url: 'http://127.0.0.1:4178/fixtures/umd-basic.html',
+    reuseExistingServer: false,
+    gracefulShutdown: {
+      signal: 'SIGINT',
+      timeout: 60_000,
+    },
+    timeout: 60_000,
+  },
 });

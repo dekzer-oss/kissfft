@@ -95,7 +95,9 @@
     "prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test",
     "test:e2e": "playwright test -c playwright.config.ts",
     "e2e:open": "playwright test -c playwright.config.ts --ui",
-    "e2e:browsers": "playwright install --with-deps"
+    "e2e:browsers": "playwright install --with-deps",
+    "preview:e2e": "pnpm run build && vite preview --host 127.0.0.1 --strictPort --port 4178"
+
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",

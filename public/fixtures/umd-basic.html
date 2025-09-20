@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>UMD E2E – KissFFT</title>
+  <title>UMD – KissFFT</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
 </head>
 <body>
-<!-- Important: UMD global is window.DekzerKissfft -->
-<script src="/dist/kissfft.umd.js"></script>
+<!-- Preview serves dist/ at "/" so the UMD sits at /kissfft.umd.js -->
+<script src="/kissfft.umd.js"></script>
 <script>
-  // smoke: mark that script loaded
+  // smoke marker for tests that only check the global
   window.__umdLoaded = typeof window.DekzerKissfft === 'object';
 </script>
 </body>

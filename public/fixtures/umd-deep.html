@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>UMD deep path</title>
+  <!-- Simulate a deep subpath; use absolute script src so <base> can't break it -->
+  <base href="/really/deep/sub/path/">
+  <script src="/kissfft.umd.js"></script>
+  <script>
+    window.__umdLoaded = typeof window.DekzerKissfft === 'object';
+  </script>
+</head>
+<body></body>
+</html>

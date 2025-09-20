@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('real 1-D forward/inverse behaves and lengths match', async ({ page }) => {
-  await page.goto('/tests/e2e/fixtures/umd-basic.html');
+  await page.goto('/fixtures/umd-basic.html');
 
   const out = await page.evaluate(async () => {
     const api = (window as any).DekzerKissfft;
@@ -29,7 +29,7 @@ test('real 1-D forward/inverse behaves and lengths match', async ({ page }) => {
 });
 
 test('N-D real FFT packed length matches formula and round-trips', async ({ page }) => {
-  await page.goto('/tests/e2e/fixtures/umd-basic.html');
+  await page.goto('/fixtures/umd-basic.html');
 
   const out = await page.evaluate(async () => {
     const api = (window as any).DekzerKissfft;

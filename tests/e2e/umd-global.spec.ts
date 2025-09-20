@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('UMD sets the expected global and API surface', async ({ page }) => {
-  await page.goto('/tests/e2e/fixtures/umd-basic.html');
+  await page.goto('/fixtures/umd-basic.html');
 
   const hasGlobal = await page.evaluate(() => !!(window as any).DekzerKissfft);
   expect(hasGlobal).toBe(true);

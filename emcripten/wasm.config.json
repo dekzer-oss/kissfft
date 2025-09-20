@@ -1,0 +1,44 @@
+{
+  "//": "Common configuration for both scalar and SIMD builds",
+  "sources": [
+    "src/wasm/kiss_fft.c",
+    "src/wasm/kiss_fftr.c",
+    "src/wasm/kiss_fftnd.c",
+    "src/wasm/kiss_fftndr.c"
+  ],
+  "includes": ["src/wasm"],
+  "cflags": ["-std=c11", "-O3", "-fno-math-errno"],
+  "emflags": [
+    "-s","WASM=1",
+    "-s","STRICT=1",
+    "-s","DYNAMIC_EXECUTION=0",
+    "-s","ENVIRONMENT=web,worker,node",
+    "-s","FILESYSTEM=0",
+    "-s","MODULARIZE=1",
+    "-s","EXPORT_ES6=1",
+    "-s","EXPORT_NAME=createModule",
+    "-s","ALLOW_MEMORY_GROWTH=1",
+    "-s","INITIAL_MEMORY=16777216",
+    "-s","ASSERTIONS=0",
+    "-s","MINIMAL_RUNTIME=0",
+    "-s","EXPORTED_RUNTIME_METHODS=['HEAP8','HEAPU8','HEAP16','HEAPU16','HEAP32','HEAPU32','HEAPF32','HEAPF64','stackSave','stackAlloc','stackRestore','UTF8ToString','stringToUTF8','lengthBytesUTF8']",
+    "-s","INCOMING_MODULE_JS_API=['locateFile','wasmBinary']"
+  ],
+  "exports": [
+    "_malloc",
+    "_free",
+    "_kiss_fft_alloc",
+    "_kiss_fft",
+    "_kiss_fftr_alloc",
+    "_kiss_fftr",
+    "_kiss_fftri",
+    "_kiss_fftnd_alloc",
+    "_kiss_fftnd",
+    "_kiss_fftndr_alloc",
+    "_kiss_fftndr",
+    "_kiss_fftndri",
+    "_kiss_fft_next_fast_size",
+    "_kiss_fft_cleanup"
+  ],
+  "outBase": "build/kissfft-wasm"
+}

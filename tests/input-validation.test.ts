@@ -1,11 +1,9 @@
 /**
- * Input‑validation & utility tests
- * ───────────────────────────────────────────────────────────
- *  • Guards against invalid parameters (size ≤ 0, non‑integer, odd real‑N, etc.)
- *  • Verifies helper utilities (`handleOddLengthRealFft`, `getCacheStats`)
+ * Input-validation & cache invariants
+ * • Adds explicit cache size assertions so suites self-police resource usage
  */
 
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import {
   cleanupKissFft,
   createKissFft,
@@ -14,14 +12,16 @@ import {
 } from '@/index';
 import { getCacheStats, handleOddLengthRealFft } from '@/fft';
 
+afterAll(() => cleanupKissFft());
+
 describe('API – invalid scalar sizes', () => {
-  it('rejects non‑positive or non‑integer N', async () => {
+  it('rejects non-positive or non-integer N', async () => {
     await expect(createKissFft(0)).rejects.toThrow(/invalid fft size/i);
     await expect(createKissFft(-8)).rejects.toThrow(/invalid fft size/i);
     await expect(createKissFft(2.3)).rejects.toThrow(/invalid fft size/i);
   });
 
-  it('real‑FFT forbids odd lengths', async () => {
+  it('real-FFT forbids odd lengths', async () => {
     await expect(createKissRealFft(157)).rejects.toThrow(/not supported/i);
   });
 });
@@ -56,22 +56,19 @@ describe('plan cache – stats & reset', () => {
   beforeAll(() => getCacheStats());
 
   it('reflects plan creation and cleanup', async () => {
-    const baseSize = getCacheStats().size;
+    const base = getCacheStats().size;
 
     const fft = await createKissFft(16);
-    const withPlan = getCacheStats().size;
-    expect(withPlan).toBe(baseSize + 1);
+    expect(getCacheStats().size).toBe(base + 1);
 
     fft.dispose();
     await cleanupKissFft();
-
     expect(getCacheStats().size).toBe(0);
   });
 
   it('logs a warning once for very large ND transforms', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const shape = [100, 100, 101]; // 1 010 000 elements
-    const fft = await createKissNdFft(shape);
+    const fft = await createKissNdFft([100, 100, 101]); // 1,010,000 elems
     expect(warn).toHaveBeenCalledTimes(1);
     fft.dispose();
     warn.mockRestore();

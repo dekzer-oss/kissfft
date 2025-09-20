@@ -4,7 +4,7 @@
 export const BYTES_F32 = Float32Array.BYTES_PER_ELEMENT;
 
 /** Emscripten "nonnull" pointer check (0 == null) */
-export function isValidPointer(ptr: number): boolean {
+export function isValidPointer(ptr: number | undefined): boolean {
   return typeof ptr === 'number' && (ptr | 0) !== 0;
 }
 

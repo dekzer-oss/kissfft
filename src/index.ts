@@ -7,6 +7,7 @@ export {
   getCacheStats,
   nextFastSize,
   nextFastShape,
+  handleOddLengthRealFft
 } from './fft';
 
 export type {

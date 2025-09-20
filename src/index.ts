@@ -1,6 +1,4 @@
-// export { loadKissFft as loadKissFftBrowser } from './loader.browser';
-// export { loadKissFft as loadKissFftNode } from './loader.node';
-
+// src/index.ts
 export {
   createKissFft,
   createKissRealFft,
@@ -8,17 +6,17 @@ export {
   createKissNdRealFft,
   cleanupKissFft,
   getCacheStats,
-  nextFastShape,
   nextFastSize,
+  nextFastShape,
 } from './fft';
 
 export type {
   KissFftWasmModule,
-  KissFftNdInstance,
-  KissFftNdRealInstance,
   KissFftInstance,
   KissFftRealInstance,
+  KissFftNdInstance,
+  KissFftNdRealInstance,
 } from './types';
 
-export { loadKissFft } from './loader';
-export { isWasmSimdSupported } from './common/simd';
+// IMPORTANT: do NOT export loader.browser / loader.node here.
+// Keep them as subpath entrypoints only (see package.json "exports").

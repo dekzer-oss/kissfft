@@ -18,21 +18,34 @@
     "type": "git",
     "url": "https://github.com/dekzer-oss/kissfft.git"
   },
+  "types": "./dist/index.d.ts",
   "main": "./dist/kissfft.es.js",
-  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/kissfft.es.js"
+    },
+    "./loader.browser": {
+      "import": "./dist/loader.browser.js"
+    },
+    "./loader.node": {
+      "import": "./dist/loader.node.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
+    "clean": "rimraf dist build/kissfft-wasm*.{js,wasm}",
     "clean:wasm": "rimraf build/kissfft-wasm*.{js,wasm}",
+    "test:node": "vitest run --project=node",
+    "test:browser": "vitest run --project=browser",
+    "test": "vitest run --reporter=verbose",
     "bench": "vitest bench",
     "format": "prettier --write .",
-    "clean": "rimraf dist build/kissfft-wasm*.{js,wasm}",
+    "prebuild": "pnpm run build:wasm:both",
     "build:wasm:both": "node emcripten/build.mjs --both",
     "build:wasm:simd": "node emcripten/build.mjs --simd",
     "build:wasm:scalar": "node emcripten/build.mjs --scalar",
-    "prebuild": "pnpm run build:wasm:both",
-    "build": "vite build -c vite.es.config.ts && vite build -c vite.umd.config.ts",
-    "test": "vitest run --reporter=verbose",
-    "test:node": "vitest run --project=node",
-    "test:browser": "vitest run --project=browser"
+    "build": "vite build -c vite.es.config.ts && vite build -c vite.node.config.ts && vite build -c vite.umd.config.ts && rollup -c rollup.types.config.mjs && rimraf dist/types"
   },
   "files": [
     "dist/**",
@@ -52,11 +65,11 @@
     "eslint": "^9.31.0",
     "playwright": "^1.54.1",
     "prettier": "^4.0.0-alpha.12",
+    "rollup": "^4.52.0",
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-dts": "^6.2.1",
     "typescript": "^5.8.3",
     "vite": "7.1.5",
-    "vite-plugin-dts": "^4.5.4",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4"
   }

@@ -9,6 +9,8 @@
     "signal processing",
     "kissfft"
   ],
+  "unpkg": "dist/kissfft.umd.js",
+  "jsdelivr": "dist/kissfft.umd.js",
   "type": "module",
   "homepage": "https://github.com/dekzer-oss/kissfft#readme",
   "bugs": {

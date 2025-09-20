@@ -1,7 +1,6 @@
 import { isWasmSimdSupported } from './common/simd';
 import type { KissFftWasmModule } from './types';
 
-// Allow overriding where the .wasm is hosted (CDN, asset pipeline)
 let assetBaseOverride: string | undefined;
 let simdProbePromise: Promise<boolean> | null = null;
 
@@ -9,7 +8,6 @@ export function setKissFftAssetBase(baseUrl: string) {
   assetBaseOverride = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
 }
 
-// Declare the glue files as a **closed set** the bundler can analyze.
 const GLUE = {
   simd: '../build/web/dekzer-kissfft-simd.js',
   scalar: '../build/web/dekzer-kissfft.js',
@@ -51,7 +49,6 @@ export async function loadKissFft(): Promise<KissFftWasmModule> {
   });
 }
 
-// Warm the HTTP cache (SPA routing feels instant)
 export async function preloadKissFft(opts?: {
   prefer?: 'auto' | 'simd' | 'scalar';
   signal?: AbortSignal;
@@ -69,7 +66,6 @@ export async function preloadKissFft(opts?: {
   const kind: keyof typeof GLUE = simd ? 'simd' : 'scalar';
   const { glueKey, wasmUrl } = resolve(kind);
 
-  // Preload the glue module
   const glueUrl = new URL(glueKey, import.meta.url).href;
   if (typeof document !== 'undefined') {
     const link = document.createElement('link');
@@ -77,17 +73,14 @@ export async function preloadKissFft(opts?: {
     link.href = glueUrl;
     document.head.appendChild(link);
 
-    // Hint the browser that a WASM fetch is coming
     const w = document.createElement('link');
     w.rel = 'preload';
     w.as = 'fetch';
-    // type attr isn’t standardized for fetch, but harmless—and some CDNs key on it:
     w.setAttribute('type', 'application/wasm');
     w.href = wasmUrl;
     document.head.appendChild(w);
   }
 
-  // Warm the WASM response cache (works in workers too)
   try {
     await fetch(wasmUrl, { signal: opts?.signal });
   } catch {

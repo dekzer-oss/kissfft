@@ -37,6 +37,7 @@
   ],
   "main": "./dist/kissfft.node.esm.js",
   "module": "./dist/kissfft.esm.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -60,15 +61,9 @@
   },
   "typesVersions": {
     "*": {
-      "browser": [
-        "dist/kissfft.browser.d.ts"
-      ],
-      "node": [
-        "dist/kissfft.node.d.ts"
-      ],
-      "preload": [
-        "dist/kissfft.preload.d.ts"
-      ]
+      "browser": ["dist/kissfft.browser.d.ts"],
+      "node":    ["dist/kissfft.node.d.ts"],
+      "preload": ["dist/kissfft.preload.d.ts"]
     }
   },
   "unpkg": "dist/kissfft.umd.js",
@@ -78,7 +73,9 @@
     "build:wasm:perf": "node emcripten/build.mjs --both --env=both --profile=perf",
     "build:wasm:size": "node emcripten/build.mjs --both --env=both --profile=size",
     "build:wasm:both": "node emcripten/build.mjs --both --env=both",
-    "prebuild": "pnpm run build:wasm:both",
+    "rebuild:wasm": "node emcripten/build.mjs --both --env=both --force",
+    "build:wasm:nocache": "node emcripten/build.mjs --both --env=both --no-cache",
+    "prebuild": "pnpm run build:wasm:perf",
     "build": "vite build -c vite.index.config.ts && vite build -c vite.es.config.ts && vite build -c vite.node.config.ts && vite build -c vite.umd.config.ts && rollup -c rollup.types.config.mjs && rimraf dist/types",
     "pretest": "pnpm run build:wasm:both || true",
     "test": "vitest run --reporter=verbose",

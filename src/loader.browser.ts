@@ -30,12 +30,11 @@ function toUrlString(u: string | URL): string {
 }
 
 /** Build-time glue locations (kept out of the bundle by @vite-ignore). */
-const SIMDX_JS_URL = new URL('../build/dekzer-kissfft-simd.js', import.meta.url);
-const SCALAR_JS_URL = new URL('../build/dekzer-kissfft.js', import.meta.url);
+const SIMDX_JS_URL   = new URL('../build/web/dekzer-kissfft-simd.js', import.meta.url);
+const SCALAR_JS_URL  = new URL('../build/web/dekzer-kissfft.js', import.meta.url);
 
-/** Default co-located .wasm next to the glue files. */
-const SIMDX_WASM_URL = new URL('../build/dekzer-kissfft-simd.wasm', import.meta.url);
-const SCALAR_WASM_URL = new URL('../build/dekzer-kissfft.wasm', import.meta.url);
+const SIMDX_WASM_URL = new URL('../build/web/dekzer-kissfft-simd.wasm', import.meta.url);
+const SCALAR_WASM_URL= new URL('../build/web/dekzer-kissfft.wasm', import.meta.url);
 
 /**
  * Loads the KISS FFT WASM module in browsers with strict typing.
@@ -68,6 +67,4 @@ export async function loadKissFft(
   });
 }
 
-// Optional alias for compatibility with earlier naming
-export const loadKissfftWasmBrowser = loadKissFft;
 export type { KissFftWasmModule } from './types';

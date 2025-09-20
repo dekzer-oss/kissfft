@@ -1,40 +1,27 @@
 // emcripten/build.mjs
-// Build KISS FFT WASM (scalar/SIMD) from a single JSON config.
-// Usage:
-//   node emcripten/build.mjs --both              // default: perf
-//   node emcripten/build.mjs --simd
-//   node emcripten/build.mjs --scalar
-//   node emcripten/build.mjs --both --profile=size  // size-optimized variant
-//
-// Env:
-//   EMCC=/path/to/emcc    (optional; defaults to 'emcc')
-
-import { readFile, mkdir } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
-import { resolve, dirname } from 'node:path';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const root = resolve(__dirname, '..');
+const cfgPath = resolve(__dirname, 'wasm.config.json');
 
 const EMCC = process.env.EMCC || 'emcc';
-const args = process.argv.slice(2);
 
-// what to build
-const WANT_SIMD   = args.includes('--simd');
-const WANT_SCALAR = args.includes('--scalar');
-const WANT_BOTH   = args.includes('--both') || (!WANT_SIMD && !WANT_SCALAR);
+// CLI flags
+const WANT_SIMD = process.argv.includes('--simd');
+const WANT_SCALAR = process.argv.includes('--scalar');
+const WANT_BOTH = process.argv.includes('--both') || (!WANT_SIMD && !WANT_SCALAR);
 
-// profile: perf (default) or size
-const PROFILE = (() => {
-  const flag = args.find(a => a.startsWith('--profile='));
-  return flag ? flag.split('=')[1] : 'perf';
-})();
+const PROFILE =
+  process.argv.find((a) => a.startsWith('--profile='))?.split('=')[1] || 'perf';
+const ENVSEL = process.argv.find((a) => a.startsWith('--env='))?.split('=')[1] || 'both'; // browser|node|both
 
-const root = resolve(process.cwd());
-const cfgPath = resolve(root, 'emcripten/wasm.config.json');
-
-// ──────────────────────────────────────────────────────────────────────────────
-// utils
 function hdr(msg) {
-  const bar = '─'.repeat(Math.max(0, 70 - msg.length));
-  console.log(`\n${msg} ${bar}`);
+  const w = 70;
+  console.log(`${msg} ${'─'.repeat(Math.max(1, w - msg.length))}`);
 }
 
 function spawnp(cmd, argv) {
@@ -53,70 +40,71 @@ async function ensureDirFor(filePath) {
   await mkdir(dirname(filePath), { recursive: true });
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// argument construction
-function buildArgs(cfg, simd) {
-  const outBase = cfg.outBase + (simd ? '-simd' : '');
-  const outJs = resolve(root, `${outBase}.js`);
-
+// Build args per env + simd
+function buildArgs(cfg, { simd, env }) {
   const includeArgs = (cfg.includes || []).flatMap((p) => ['-I', resolve(root, p)]);
   const exportList = `EXPORTED_FUNCTIONS=${JSON.stringify(cfg.exports || [])}`;
 
   const cflags = [...(cfg.cflags || [])];
   if (simd) cflags.push('-msimd128');
 
-  const emflags = pairify(cfg.emflags || []);
+  // Base emflags from config, but strip any ENVIRONMENT and re-inject
+  const emflags = pairify(cfg.emflags || []).filter((x, i, arr) => {
+    // remove "-s","ENVIRONMENT=..." pairs if present
+    if (x === '-s' && /^ENVIRONMENT=/.test(arr[i + 1] || '')) return false;
+    if (/^ENVIRONMENT=/.test(x)) return false;
+    return true;
+  });
 
-  // Profile-specific tweaks
+  emflags.push('-s', env === 'browser' ? 'ENVIRONMENT=web,worker' : 'ENVIRONMENT=node');
+
   if (PROFILE === 'size') {
-    // Prefer code size; keep CSP + ES6 module glue
     const i = cflags.indexOf('-O3');
     if (i >= 0) cflags.splice(i, 1);
     cflags.push('-Os');
-
-    // Closure for smaller JS glue (safe with EXPORT_ES6 + MODULARIZE)
     emflags.push('--closure', '1');
-
-    // If you later flip MINIMAL_RUNTIME=1 in cfg.emflags, verify tests first.
   }
 
-  return [
-    ...cflags,
-    ...includeArgs,
-    ...(cfg.sources || []).map((s) => resolve(root, s)),
-    '-o', outJs,
-    ...emflags,
-    '-s', exportList,
-  ];
+  return { cflags, includeArgs, emflags, exportList };
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// one build
-async function buildOne(cfg, simd) {
-  const title = simd ? 'Building KISS FFT WASM (SIMD)' : 'Building KISS FFT WASM (scalar)';
+function outBaseFor(cfg, { simd, env }) {
+  const base = cfg.outBase.replace(/^build\//, '');
+  const dir = env === 'browser' ? 'build/web' : 'build/node';
+  return `${dir}/${base}${simd ? '-simd' : ''}`;
+}
+
+async function buildOne(cfg, { simd, env }) {
+  const title = `Building KISS FFT WASM (${simd ? 'SIMD' : 'scalar'}) [${env}]`;
   hdr(`${title} [${PROFILE}]`);
 
-  const outBase = cfg.outBase + (simd ? '-simd' : '');
+  const outBase = outBaseFor(cfg, { simd, env });
   const outJs = resolve(root, `${outBase}.js`);
-  await ensureDirFor(outJs); // ensure e.g. ./build exists
+  await ensureDirFor(outJs);
 
-  const argv = buildArgs(cfg, simd);
+  const a = buildArgs(cfg, { simd, env });
+  const argv = [
+    ...a.cflags,
+    ...a.includeArgs,
+    ...(cfg.sources || []).map((s) => resolve(root, s)),
+    '-o',
+    outJs,
+    ...a.emflags,
+    '-s',
+    a.exportList,
+  ];
+
   await spawnp(EMCC, argv);
-
   console.log(`✅ ${outBase}.js / ${outBase}.wasm`);
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// main
 (async () => {
   const cfg = JSON.parse(await readFile(cfgPath, 'utf-8'));
+  const envs = ENVSEL === 'both' ? ['browser', 'node'] : [ENVSEL];
 
-  if (WANT_BOTH) {
-    await buildOne(cfg, true);
-    await buildOne(cfg, false);
-  } else {
-    if (WANT_SIMD)   await buildOne(cfg, true);
-    if (WANT_SCALAR) await buildOne(cfg, false);
+  for (const env of envs) {
+    if (WANT_BOTH || WANT_SIMD) await buildOne(cfg, { simd: true, env });
+    if (WANT_BOTH || WANT_SCALAR) await buildOne(cfg, { simd: false, env });
   }
 })().catch((e) => {
   console.error('❌ Build failed:', e.message);

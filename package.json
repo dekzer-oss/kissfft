@@ -2,17 +2,30 @@
   "name": "@dekzer/kissfft",
   "version": "0.1.0",
   "description": "WebAssembly-compiled KISS FFT library with TypeScript bindings",
-  "keywords": ["fft", "webassembly", "dsp", "signal processing", "kissfft"],
+  "keywords": [
+    "fft",
+    "webassembly",
+    "dsp",
+    "signal processing",
+    "kissfft"
+  ],
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://github.com/dekzer-oss/kissfft#readme",
-  "repository": { "type": "git", "url": "https://github.com/dekzer-oss/kissfft.git" },
-  "bugs": { "url": "https://github.com/dekzer-oss/kissfft/issues" },
-
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dekzer-oss/kissfft.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dekzer-oss/kissfft/issues"
+  },
   "type": "module",
   "sideEffects": false,
-  "engines": { "node": ">=18.17" },
-  "publishConfig": { "access": "public" },
-
+  "engines": {
+    "node": ">=18.17"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -33,46 +46,47 @@
   },
   "typesVersions": {
     "*": {
-      "browser": ["dist/browser.d.ts"],
-      "node": ["dist/node.d.ts"]
+      "browser": [
+        "dist/browser.d.ts"
+      ],
+      "node": [
+        "dist/node.d.ts"
+      ]
     }
   },
-
-  "files": [
-    "dist/**",
-    "build/dekzer-kissfft*.{js,wasm}",
-    "README.md",
-    "LICENSE",
-    "NOTICE",
-    "THIRD_PARTY_LICENSES/**"
-  ],
   "unpkg": "dist/dekzer-kissfft.umd.js",
   "jsdelivr": "dist/dekzer-kissfft.umd.js",
-
   "scripts": {
-    "clean": "rimraf dist build/dekzer-kissfft*.{js,wasm}",
-    "clean:wasm": "rimraf build/dekzer-kissfft*.{js,wasm}",
+    "clean": "rimraf dist build/dekzer-kissfft*.{js,wasm} build/web build/node",
+    "clean:wasm": "rimraf build/dekzer-kissfft*.{js,wasm} build/web build/node",
 
-    "build:wasm:perf": "node emcripten/build.mjs --both --profile=perf",
-    "build:wasm:size": "node emcripten/build.mjs --both --profile=size",
-    "build:wasm:both": "node emcripten/build.mjs --both",
+    "build:wasm:perf": "node emcripten/build.mjs --both --env=both --profile=perf",
+    "build:wasm:size": "node emcripten/build.mjs --both --env=both --profile=size",
+    "build:wasm:both": "node emcripten/build.mjs --both --env=both",
 
     "prebuild": "pnpm run build:wasm:both",
-    "build": "vite build -c vite.es.config.ts && vite build -c vite.node.config.ts && vite build -c vite.umd.config.ts && rollup -c rollup.types.config.mjs && rimraf dist/types",
 
+    "build": "vite build -c vite.index.config.ts && vite build -c vite.es.config.ts && vite build -c vite.node.config.ts && vite build -c vite.umd.config.ts && rollup -c rollup.types.config.mjs && rimraf dist/types",
     "pretest": "pnpm run build:wasm:both || true",
     "test": "vitest run --reporter=verbose",
     "test:node": "vitest run --project=node",
     "test:browser": "vitest run --project=browser",
     "bench": "vitest bench",
-
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test"
   },
-
+  "files": [
+    "dist/**",
+    "build/web/dekzer-kissfft*.{js,wasm}",
+    "build/node/dekzer-kissfft*.{js,wasm}",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+    "THIRD_PARTY_LICENSES/**"
+  ],
   "devDependencies": {
     "@types/node": "^24.0.15",
     "@vitest/browser": "^3.2.4",

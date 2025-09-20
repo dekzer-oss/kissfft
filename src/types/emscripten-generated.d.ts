@@ -8,11 +8,20 @@ export interface EmscriptenInitOptions {
 export type CreateModule = (opts?: EmscriptenInitOptions) => Promise<KissFftWasmModule>;
 
 // Declarations for the generated glue files
-declare module "../build/kissfft-wasm.js" {
+declare module "../build/web/dekzer-kissfft.js" {
   const createModule: CreateModule;
   export default createModule;
 }
-declare module "../build/kissfft-wasm-simd.js" {
+declare module "../build/web/dekzer-kissfft-simd.js" {
+  const createModule: CreateModule;
+  export default createModule;
+}
+
+declare module "../build/node/dekzer-kissfft.js" {
+  const createModule: CreateModule;
+  export default createModule;
+}
+declare module "../build/node/dekzer-kissfft-simd.js" {
   const createModule: CreateModule;
   export default createModule;
 }

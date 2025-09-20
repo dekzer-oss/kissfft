@@ -1,4 +1,3 @@
-// src/fft/cleanup.ts
 import { loadKissFft } from '@/loader';
 import { cleanupCache, planCache} from './cache';
 import type { KissFftWasmModule } from '@/types';

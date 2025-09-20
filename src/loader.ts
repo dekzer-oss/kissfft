@@ -7,17 +7,18 @@ let modulePromise: Promise<KissFftWasmModule> | undefined;
 export async function loadKissFft(): Promise<KissFftWasmModule> {
   if (!modulePromise) {
     if (isBrowser()) {
-      const { loadKissFft: loadBrowser } = await import('./loader.browser.js');
+      const browserEntry = './loader.' + 'browser' + '.js';
+      const { loadKissFft: loadBrowser } = await import(/* @vite-ignore */ browserEntry);
       modulePromise = loadBrowser();
     } else {
-      const { loadKissFft: loadNode } = await import('./loader.node.js');
+      const nodeEntry = './loader.' + 'node' + '.js';
+      const { loadKissFft: loadNode } = await import(/* @vite-ignore */ nodeEntry);
       modulePromise = loadNode();
     }
 
-    modulePromise.then(mod => {
+    modulePromise?.then((mod) => {
       setKissFftInstance(mod);
     });
   }
-
-  return modulePromise;
+  return modulePromise!;
 }

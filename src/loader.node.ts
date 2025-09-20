@@ -4,8 +4,9 @@
  */
 
 import { readFile as nodeReadFile } from 'node:fs/promises';
-import createSimdModuleUntyped from '../build/dekzer-kissfft-simd.js';
-import createScalarModuleUntyped from '../build/dekzer-kissfft.js';
+import createSimdModuleUntyped from '../build/node/dekzer-kissfft-simd.js';
+import createScalarModuleUntyped from '../build/node/dekzer-kissfft.js';
+
 import type { KissFftWasmModule } from './types';
 
 interface EmscriptenInit {
@@ -35,14 +36,14 @@ const FILENAME: Record<Flavor, string> = {
   simd: 'dekzer-kissfft-simd.wasm',
 };
 
+function defaultUrl(flavor: Flavor): URL {
+  return new URL(`../build/node/${FILENAME[flavor]}`, import.meta.url);
+}
+
 function toArrayBuffer(view: ArrayBuffer | Uint8Array): ArrayBuffer {
   if (view instanceof ArrayBuffer) return view;
   const { buffer, byteOffset, byteLength } = view;
   return buffer.slice(byteOffset, byteOffset + byteLength) as ArrayBuffer;
-}
-
-function defaultUrl(flavor: Flavor): URL {
-  return new URL(`../build/${FILENAME[flavor]}`, import.meta.url);
 }
 
 async function readBytes(

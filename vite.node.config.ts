@@ -6,27 +6,31 @@ import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
+// Treat this bundle as SSR (Node), not browser.
 export default defineConfig({
   plugins: [tsconfigPaths()],
-  // Node bundle is ESM; the loader reads WASM from ../build via fs (no asset handling needed)
   build: {
+    ssr: true,                 // <- critical: stop "browser external" stubs
     lib: {
       entry: resolve(__dirname, 'src/loader.node.ts'),
       formats: ['es'],
+      fileName: () => 'node.js',
     },
     outDir: 'dist',
     emptyOutDir: false,
     sourcemap: true,
     target: 'node18',
-    treeshake: true,
     minify: 'esbuild',
     rollupOptions: {
-      // leave node:* alone; Vite might still create a tiny browser-external shim chunk, harmless in Node
-      external: [/^node:/],
+      // Keep Emscripten node glue as runtime deps; don't parse them.
+      external: (id) =>
+        id.startsWith('node:') ||
+        id === 'fs' || id === 'path' || id === 'module' || id === 'url' ||
+        id.includes('/build/node/dekzer-kissfft'),
       output: {
-        entryFileNames: () => 'node.js',
-        chunkFileNames: 'chunks/[name]-[hash].js',
-        assetFileNames: 'assets/[name]-[hash][extname]',
+        entryFileNames: 'node.js',
+        // Single-file output; prevents any helper chunks.
+        inlineDynamicImports: true,
       },
     },
   },

@@ -29,20 +29,30 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**",
+    "build/web/*",
+    "build/node/*",
+    "LICENSE",
+    "NOTICE",
+    "THIRD_PARTY_LICENSES/**",
+    "README.md"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "browser": "./dist/browser.js",
+      "node": "./dist/node.js",
+      "default": "./dist/index.js"
     },
     "./browser": {
       "types": "./dist/browser.d.ts",
-      "import": "./dist/browser.js"
+      "default": "./dist/browser.js"
     },
     "./node": {
       "types": "./dist/node.d.ts",
-      "import": "./dist/node.js"
-    },
-    "./package.json": "./package.json"
+      "default": "./dist/node.js"
+    }
   },
   "typesVersions": {
     "*": {
@@ -57,15 +67,11 @@
   "unpkg": "dist/dekzer-kissfft.umd.js",
   "jsdelivr": "dist/dekzer-kissfft.umd.js",
   "scripts": {
-    "clean": "rimraf dist build/dekzer-kissfft*.{js,wasm} build/web build/node",
-    "clean:wasm": "rimraf build/dekzer-kissfft*.{js,wasm} build/web build/node",
-
+    "clean": "rimraf dist build",
     "build:wasm:perf": "node emcripten/build.mjs --both --env=both --profile=perf",
     "build:wasm:size": "node emcripten/build.mjs --both --env=both --profile=size",
     "build:wasm:both": "node emcripten/build.mjs --both --env=both",
-
     "prebuild": "pnpm run build:wasm:both",
-
     "build": "vite build -c vite.index.config.ts && vite build -c vite.es.config.ts && vite build -c vite.node.config.ts && vite build -c vite.umd.config.ts && rollup -c rollup.types.config.mjs && rimraf dist/types",
     "pretest": "pnpm run build:wasm:both || true",
     "test": "vitest run --reporter=verbose",
@@ -78,15 +84,6 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test"
   },
-  "files": [
-    "dist/**",
-    "build/web/dekzer-kissfft*.{js,wasm}",
-    "build/node/dekzer-kissfft*.{js,wasm}",
-    "README.md",
-    "LICENSE",
-    "NOTICE",
-    "THIRD_PARTY_LICENSES/**"
-  ],
   "devDependencies": {
     "@types/node": "^24.0.15",
     "@vitest/browser": "^3.2.4",

@@ -1,57 +1,84 @@
 // tests/bench/simd-stress.bench.ts
-import { bench, describe } from 'vitest';
+import { bench, describe, beforeAll, afterAll } from 'vitest';
 import { type KissFftWasmModule, loadKissFft } from '../../src';
 
-let wasm: KissFftWasmModule;
+let wasm: KissFftWasmModule | null = null;
 
-await loadKissFft().then((m) => (wasm = m));
+beforeAll(async () => {
+  // If you add a { preferSimd: true } flag later, pass it here.
+  wasm = await loadKissFft();
 
-function createComplexBuffer(size: number) {
-  const real = new Float32Array(size);
-  const imag = new Float32Array(size);
-  for (let i = 0; i < size; i++) {
-    real[i] = Math.sin((2 * Math.PI * i) / size);
-    imag[i] = 0;
-  }
-  return { real, imag };
-}
+  // Warm up tiny path so link/JIT costs don’t pollute first sample.
+  const cfg = wasm._kiss_fft_alloc(16, 0, 0, 0);
+  const inPtr = wasm._malloc(16 * 2 * 4);
+  const outPtr = wasm._malloc(16 * 2 * 4);
+  wasm._kiss_fft(cfg, inPtr, outPtr);
+  wasm._free(inPtr); wasm._free(outPtr); wasm._free(cfg);
+});
 
-function performFft(nfft: number, inverse: boolean) {
-  const total = 16; // how many full FFTs we run per benchmark loop
-  const size = nfft * 2;
+type Case = {
+  nfft: number;
+  inverse: boolean;
+  inputPtr: number;
+  outputPtr: number;
+  cfgPtr: number;
+  run: () => void;
+  free: () => void;
+};
 
-  const { real, imag } = createComplexBuffer(nfft);
-  const inputPtr = wasm._malloc(size * 4);
-  const outputPtr = wasm._malloc(size * 4);
+const cases = new Map<string, Case>();
+const keyOf = (nfft: number, inverse: boolean) => `${nfft}:${inverse ? 1 : 0}`;
+
+function ensureCase(nfft: number, inverse: boolean): Case {
+  const key = keyOf(nfft, inverse);
+  const existing = cases.get(key);
+  if (existing) return existing;
+
+  if (!wasm) throw new Error('WASM module not loaded yet');
+
+  const complexElems = nfft * 2;            // interleaved [re, im, re, im...]
+  const bytes = complexElems * 4;
+
   const cfgPtr = wasm._kiss_fft_alloc(nfft, inverse ? 1 : 0, 0, 0);
+  const inputPtr = wasm._malloc(bytes);
+  const outputPtr = wasm._malloc(bytes);
 
-  const input = new Float32Array(wasm.HEAPF32.buffer, inputPtr, size);
-  const output = new Float32Array(wasm.HEAPF32.buffer, outputPtr, size);
+  const input = new Float32Array(wasm.HEAPF32.buffer, inputPtr, complexElems);
 
-  return () => {
-    for (let t = 0; t < total; t++) {
-      // interleave real/imag into HEAP
-      for (let i = 0; i < nfft; i++) {
-        input[i * 2] = real[i];
-        input[i * 2 + 1] = imag[i];
-      }
-      wasm._kiss_fft(cfgPtr, inputPtr, outputPtr);
-    }
+  // Pre-fill a sine into interleaved input ONCE.
+  for (let i = 0; i < nfft; i++) {
+    input[i * 2] = Math.sin((2 * Math.PI * i) / nfft); // re
+    input[i * 2 + 1] = 0;                              // im
+  }
+
+  const BATCH = 16; // amortize JS→WASM boundary
+
+  const run = () => {
+    // wasm! is safe here; bench callbacks run after beforeAll.
+    for (let t = 0; t < BATCH; t++) wasm!._kiss_fft(cfgPtr, inputPtr, outputPtr);
   };
+
+  const free = () => {
+    wasm!._free(inputPtr);
+    wasm!._free(outputPtr);
+    wasm!._free(cfgPtr);
+  };
+
+  const c: Case = { nfft, inverse, inputPtr, outputPtr, cfgPtr, run, free };
+  cases.set(key, c);
+  return c;
 }
+
+afterAll(() => {
+  for (const c of cases.values()) c.free();
+  cases.clear();
+});
 
 const SIZES = [128, 512, 2048, 8192, 32768];
 
-describe('KissFFT SIMD Stress Benchmark', () => {
-  for (const size of SIZES) {
-    bench(`complex forward SIMD stress N=${size}`, () => {
-      const run = performFft(size, false);
-      run();
-    });
-
-    bench(`complex inverse SIMD stress N=${size}`, () => {
-      const run = performFft(size, true);
-      run();
-    });
+describe('KissFFT kernel stress (complex, interleaved)', () => {
+  for (const n of SIZES) {
+    bench(`complex forward N=${n}`, () => ensureCase(n, false).run(), { time: 500 });
+    bench(`complex inverse N=${n}`, () => ensureCase(n, true).run(),  { time: 500 });
   }
 });

@@ -1,70 +1,32 @@
-// src/loader.browser.ts
-/**
- * Browser loader: lazy-imports the Emscripten glue so bundlers
- * don't try to parse Node-ish code inside it. We point the glue
- * at the correct .wasm via locateFile.
- */
-
+// Browser: try SIMD glue first, then scalar. No flags, no logs, just fallback.
 import type { KissFftWasmModule } from './types';
 
-interface EmscriptenInit {
-  locateFile?: (path: string, prefix: string) => string;
-  wasmBinary?: ArrayBuffer | Uint8Array;
-}
+async function loadVia(glueRel: string, wasmRel: string): Promise<KissFftWasmModule> {
+  const glueUrl = new URL(glueRel, import.meta.url).href;
+  const wasmUrl = new URL(wasmRel, import.meta.url).href;
 
-type ModuleFactory = (opts: EmscriptenInit) => Promise<KissFftWasmModule>;
+  // Tell Emscripten where to fetch the wasm from.
+  // @vite-ignore: glueUrl is computed at runtime on purpose.
+  const createModule = (await import(/* @vite-ignore */ glueUrl)).default as
+    (opts: any) => Promise<KissFftWasmModule>;
 
-export interface BrowserLoaderOptions {
-  /** Force SIMD selection (skips feature detection elsewhere). */
-  preferSimd?: boolean;
-  /** Override .wasm URLs (absolute/relative URL strings). */
-  wasmPaths?: {
-    simd?: string | URL;
-    scalar?: string | URL;
-  };
-}
-
-/** Resolve to a string URL regardless of input type. */
-function toUrlString(u: string | URL): string {
-  return typeof u === 'string' ? u : u.toString();
-}
-
-/** Build-time glue locations (kept out of the bundle by @vite-ignore). */
-const SIMDX_JS_URL   = new URL('../build/web/dekzer-kissfft-simd.js', import.meta.url);
-const SCALAR_JS_URL  = new URL('../build/web/dekzer-kissfft.js', import.meta.url);
-
-const SIMDX_WASM_URL = new URL('../build/web/dekzer-kissfft-simd.wasm', import.meta.url);
-const SCALAR_WASM_URL= new URL('../build/web/dekzer-kissfft.wasm', import.meta.url);
-
-/**
- * Loads the KISS FFT WASM module in browsers with strict typing.
- * Name matches internal imports: `import { loadKissFft } from '@/browser'`.
- */
-export async function loadKissFft(
-  opts?: BrowserLoaderOptions
-): Promise<KissFftWasmModule> {
-  const wantSimd = !!opts?.preferSimd;
-
-  if (wantSimd) {
-    // Dynamically import the Emscripten glue; prevent bundlers from touching it.
-    const mod = (await import(/* @vite-ignore */ SIMDX_JS_URL.toString())) as {
-      default: ModuleFactory;
-    };
-    const wasmUrl = opts?.wasmPaths?.simd ?? SIMDX_WASM_URL;
-    return mod.default({
-      locateFile: (path) =>
-        path.endsWith('.wasm') ? toUrlString(wasmUrl) : path,
-    });
-  }
-
-  const mod = (await import(/* @vite-ignore */ SCALAR_JS_URL.toString())) as {
-    default: ModuleFactory;
-  };
-  const wasmUrl = opts?.wasmPaths?.scalar ?? SCALAR_WASM_URL;
-  return mod.default({
-    locateFile: (path) =>
-      path.endsWith('.wasm') ? toUrlString(wasmUrl) : path,
+  return createModule({
+    locateFile: (p: string) => (p.endsWith('.wasm') ? wasmUrl : p),
   });
 }
 
-export type { KissFftWasmModule } from './types';
+export async function loadKissFft(): Promise<KissFftWasmModule> {
+  // SIMD first
+  try {
+    return await loadVia(
+      '../build/web/dekzer-kissfft-simd.js',
+      '../build/web/dekzer-kissfft-simd.wasm',
+    );
+  } catch {
+    // Scalar fallback
+    return loadVia(
+      '../build/web/dekzer-kissfft.js',
+      '../build/web/dekzer-kissfft.wasm',
+    );
+  }
+}

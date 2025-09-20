@@ -11,7 +11,8 @@ describe('API parity', () => {
       'cleanupKissFft',
       'getCacheStats',
       'nextFastShape',
-      'nextFastSize'
+      'nextFastSize',
+      'loadKissFft',
     ])
       expect(api).toHaveProperty(name);
   });

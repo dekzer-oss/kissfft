@@ -16,3 +16,5 @@ export type {
   KissFftNdInstance,
   KissFftNdRealInstance,
 } from './types';
+
+export { loadKissFft } from './loader';

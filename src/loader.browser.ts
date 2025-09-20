@@ -87,3 +87,6 @@ export async function preloadKissFft(opts?: {
     /* ignore */
   }
 }
+
+const api = { setKissFftAssetBase, loadKissFft, preloadKissFft };
+export default api;

@@ -61,9 +61,15 @@
   },
   "typesVersions": {
     "*": {
-      "browser": ["dist/kissfft.browser.d.ts"],
-      "node":    ["dist/kissfft.node.d.ts"],
-      "preload": ["dist/kissfft.preload.d.ts"]
+      "browser": [
+        "dist/kissfft.browser.d.ts"
+      ],
+      "node": [
+        "dist/kissfft.node.d.ts"
+      ],
+      "preload": [
+        "dist/kissfft.preload.d.ts"
+      ]
     }
   },
   "unpkg": "dist/kissfft.umd.js",
@@ -86,13 +92,16 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test"
+    "prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test",
+    "test:e2e": "playwright test -c playwright.config.ts",
+    "e2e:open": "playwright test -c playwright.config.ts --ui",
+    "e2e:browsers": "playwright install --with-deps"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "@types/node": "^24.0.15",
     "@vitest/browser": "^3.2.4",
     "eslint": "^9.31.0",
-    "playwright": "^1.54.1",
     "prettier": "^4.0.0-alpha.12",
     "rimraf": "^6.0.1",
     "rollup": "^4.52.0",

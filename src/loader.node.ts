@@ -64,3 +64,6 @@ export async function loadKissFft(): Promise<KissFftWasmModule> {
     return loadVia('dekzer-kissfft'); // scalar fallback
   }
 }
+
+const api = { setKissFftNodeAssetDir, loadKissFft };
+export default api;

@@ -4,8 +4,8 @@
  */
 
 import { readFile as nodeReadFile } from 'node:fs/promises';
-import createSimdModuleUntyped from '../build/kissfft-wasm-simd.js';
-import createScalarModuleUntyped from '../build/kissfft-wasm.js';
+import createSimdModuleUntyped from '../build/dekzer-kissfft-simd.js';
+import createScalarModuleUntyped from '../build/dekzer-kissfft.js';
 import type { KissFftWasmModule } from './types';
 
 interface EmscriptenInit {
@@ -31,8 +31,8 @@ export interface NodeLoaderOptions {
 
 type Flavor = 'scalar' | 'simd';
 const FILENAME: Record<Flavor, string> = {
-  scalar: 'kissfft-wasm.wasm',
-  simd: 'kissfft-wasm-simd.wasm',
+  scalar: 'dekzer-kissfft.wasm',
+  simd: 'dekzer-kissfft-simd.wasm',
 };
 
 function toArrayBuffer(view: ArrayBuffer | Uint8Array): ArrayBuffer {

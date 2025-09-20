@@ -1,42 +1,38 @@
 // rollup.types.config.mjs
 import dts from 'rollup-plugin-dts';
 
-const shared = {
+const entries = {
+  index: 'src/index.ts',
+  browser: 'src/loader.browser.ts',
+  node: 'src/loader.node.ts',
+};
+
+export default {
+  input: entries,
+  output: {
+    dir: 'dist',
+    format: 'es',
+    entryFileNames: '[name].d.ts',
+    chunkFileNames: 'types/[name].d.ts',
+  },
   plugins: [
     dts({
+      respectExternal: true,
       compilerOptions: {
         stripInternal: true,
         declaration: true,
         emitDeclarationOnly: true,
         skipLibCheck: true,
         baseUrl: '.',
-        paths: { '@/*': ['src/*'] }
+        paths: { '@/*': ['src/*'] },
       },
-      respectExternal: true,
+      exclude: [
+        'src/**/*.test.*',
+        'src/**/__tests__/**',
+        'src/**/__mocks__/**',
+        'src/**/fixtures/**',
+      ],
     }),
   ],
   external: [/^node:/],
 };
-
-export default [
-  // Root public API -> dist/index.d.ts
-  {
-    input: 'src/index.ts',
-    output: { file: 'dist/index.d.ts', format: 'es' },
-    ...shared,
-  },
-
-  // Browser loader subpath -> dist/loader.browser.d.ts
-  {
-    input: 'src/loader.browser.ts',
-    output: { file: 'dist/loader.browser.d.ts', format: 'es' },
-    ...shared,
-  },
-
-  // Node loader subpath -> dist/loader.node.d.ts
-  {
-    input: 'src/loader.node.ts',
-    output: { file: 'dist/loader.node.d.ts', format: 'es' },
-    ...shared,
-  },
-];

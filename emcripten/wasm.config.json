@@ -7,7 +7,16 @@
     "src/wasm/kiss_fftndr.c"
   ],
   "includes": ["src/wasm"],
-  "cflags": ["-std=c11", "-O3", "-fno-math-errno"],
+  "cflags": [
+    "-std=c11",
+    "-O3",
+    "-flto",
+    "-fno-math-errno",
+    "-fno-exceptions",
+    "-fno-unwind-tables",
+    "-fno-asynchronous-unwind-tables",
+    "-fomit-frame-pointer"
+  ],
   "emflags": [
     "-s","WASM=1",
     "-s","STRICT=1",
@@ -17,10 +26,16 @@
     "-s","MODULARIZE=1",
     "-s","EXPORT_ES6=1",
     "-s","EXPORT_NAME=createModule",
+
     "-s","ALLOW_MEMORY_GROWTH=1",
-    "-s","INITIAL_MEMORY=16777216",
+    "-s","INITIAL_MEMORY=4194304",
+    "-s","STACK_SIZE=131072",
+    "-s","MALLOC=emmalloc",
+    "-s","NO_EXIT_RUNTIME=1",
+
     "-s","ASSERTIONS=0",
     "-s","MINIMAL_RUNTIME=0",
+
     "-s","EXPORTED_RUNTIME_METHODS=['HEAP8','HEAPU8','HEAP16','HEAPU16','HEAP32','HEAPU32','HEAPF32','HEAPF64','stackSave','stackAlloc','stackRestore','UTF8ToString','stringToUTF8','lengthBytesUTF8']",
     "-s","INCOMING_MODULE_JS_API=['locateFile','wasmBinary']"
   ],
@@ -40,5 +55,5 @@
     "_kiss_fft_next_fast_size",
     "_kiss_fft_cleanup"
   ],
-  "outBase": "build/kissfft-wasm"
+  "outBase": "build/dekzer-kissfft"
 }

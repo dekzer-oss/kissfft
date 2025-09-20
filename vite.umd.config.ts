@@ -1,25 +1,35 @@
+// vite.umd.config.ts
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
-  resolve: {
-    alias: [
-      // UMD is browser-targeted → force browser loader
-      { find: '@/loader', replacement: '/src/loader.browser.ts' },
-    ],
-  },
+  assetsInclude: [/\.wasm$/], // allow UMD build to emit referenced WASM
   build: {
-    emptyOutDir: false,   // keep dist/ artifacts from earlier steps
     lib: {
-      entry: 'src/index.ts',
+      entry: resolve(__dirname, 'src/index.ts'), // <- correct absolute path
+      name: 'DekzerKissfft',
       formats: ['umd'],
-      name: 'kissfft',
-      fileName: () => 'kissfft.umd.js',
+      fileName: () => 'dekzer-kissfft.umd.js',
     },
+    outDir: 'dist',
+    emptyOutDir: false,
+    sourcemap: true,
+    target: 'es2018',
+    minify: 'esbuild',
     rollupOptions: {
-      external: [/^node:/], // belt-and-suspenders
-      output: { globals: {} },
+      // UMD is browser-only; keep node:* out
+      external: [/^node:/],
+      output: {
+        assetFileNames: (asset) => {
+          if (asset.name?.endsWith('.wasm')) return 'assets/[name][extname]';
+          return 'assets/[name]-[hash][extname]';
+        },
+      },
     },
   },
 });

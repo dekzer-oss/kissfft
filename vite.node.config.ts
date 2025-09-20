@@ -1,26 +1,33 @@
+// vite.node.config.ts
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [tsconfigPaths()],
-  resolve: {
-    alias: [
-      // Force "@/loader" to the Node loader for this build
-      { find: '@/loader', replacement: '/src/loader.node.ts' },
-    ],
-  },
+  // Node bundle is ESM; the loader reads WASM from ../build via fs (no asset handling needed)
   build: {
-    ssr: true,              // keep node:* imports as-is
-    emptyOutDir: false,     // do NOT delete dist/ from previous pass
     lib: {
-      entry: 'src/loader.node.ts',
+      entry: resolve(__dirname, 'src/loader.node.ts'),
       formats: ['es'],
-      name: 'kissfft_loader_node',
-      fileName: () => 'loader.node.js',
     },
+    outDir: 'dist',
+    emptyOutDir: false,
+    sourcemap: true,
+    target: 'node18',
+    treeshake: true,
+    minify: 'esbuild',
     rollupOptions: {
+      // leave node:* alone; Vite might still create a tiny browser-external shim chunk, harmless in Node
       external: [/^node:/],
-      output: { inlineDynamicImports: true },
+      output: {
+        entryFileNames: () => 'node.js',
+        chunkFileNames: 'chunks/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash][extname]',
+      },
     },
   },
 });

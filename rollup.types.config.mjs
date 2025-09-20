@@ -1,8 +1,7 @@
+// rollup.types.config.mjs
 import dts from 'rollup-plugin-dts';
 
-export default {
-  input: 'src/index.ts',
-  output: { file: 'dist/index.d.ts', format: 'es' },
+const shared = {
   plugins: [
     dts({
       compilerOptions: {
@@ -13,8 +12,31 @@ export default {
         baseUrl: '.',
         paths: { '@/*': ['src/*'] }
       },
-      respectExternal: true
-    })
+      respectExternal: true,
+    }),
   ],
-  external: [/^node:/]
+  external: [/^node:/],
 };
+
+export default [
+  // Root public API -> dist/index.d.ts
+  {
+    input: 'src/index.ts',
+    output: { file: 'dist/index.d.ts', format: 'es' },
+    ...shared,
+  },
+
+  // Browser loader subpath -> dist/loader.browser.d.ts
+  {
+    input: 'src/loader.browser.ts',
+    output: { file: 'dist/loader.browser.d.ts', format: 'es' },
+    ...shared,
+  },
+
+  // Node loader subpath -> dist/loader.node.d.ts
+  {
+    input: 'src/loader.node.ts',
+    output: { file: 'dist/loader.node.d.ts', format: 'es' },
+    ...shared,
+  },
+];

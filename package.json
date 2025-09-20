@@ -9,8 +9,6 @@
     "signal processing",
     "kissfft"
   ],
-  "unpkg": "dist/kissfft.umd.js",
-  "jsdelivr": "dist/kissfft.umd.js",
   "type": "module",
   "homepage": "https://github.com/dekzer-oss/kissfft#readme",
   "bugs": {
@@ -20,24 +18,46 @@
     "type": "git",
     "url": "https://github.com/dekzer-oss/kissfft.git"
   },
-  "types": "./dist/index.d.ts",
   "main": "./dist/kissfft.es.js",
+  "module": "./dist/kissfft.es.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/kissfft.es.js"
     },
-    "./loader.browser": {
+    "./browser": {
+      "types": "./dist/loader.browser.d.ts",
       "import": "./dist/loader.browser.js"
     },
-    "./loader.node": {
+    "./node": {
+      "types": "./dist/loader.node.d.ts",
       "import": "./dist/loader.node.js"
-    },
-    "./package.json": "./package.json"
+    }
   },
+  "typesVersions": {
+    "*": {
+      "browser": ["dist/loader.browser.d.ts"],
+      "node": ["dist/loader.node.d.ts"]
+    }
+  },
+  "files": [
+    "dist/**",
+    "build/kissfft-wasm*.{js,wasm}",
+    "README.md",
+    "LICENSE",
+    "NOTICE",
+    "THIRD_PARTY_LICENSES/**"
+  ],
+  "sideEffects": false,
+  "unpkg": "dist/kissfft.umd.js",
+  "jsdelivr": "dist/kissfft.umd.js",
+  "publishConfig": { "access": "public" },
+  "engines": { "node": ">=18.17" },
   "scripts": {
     "clean": "rimraf dist build/kissfft-wasm*.{js,wasm}",
     "clean:wasm": "rimraf build/kissfft-wasm*.{js,wasm}",
+    "pretest": "pnpm run build:wasm:both || true",
     "test:node": "vitest run --project=node",
     "test:browser": "vitest run --project=browser",
     "test": "vitest run --reporter=verbose",
@@ -49,18 +69,6 @@
     "build:wasm:scalar": "node emcripten/build.mjs --scalar",
     "build": "vite build -c vite.es.config.ts && vite build -c vite.node.config.ts && vite build -c vite.umd.config.ts && rollup -c rollup.types.config.mjs && rimraf dist/types"
   },
-  "files": [
-    "dist/**",
-    "build/kissfft-wasm.js",
-    "build/kissfft-wasm.wasm",
-    "build/kissfft-wasm-simd.js",
-    "build/kissfft-wasm-simd.wasm",
-    "emcripten/wasm.config.json",
-    "README.md",
-    "LICENSE",
-    "NOTICE",
-    "THIRD_PARTY_LICENSES/**"
-  ],
   "devDependencies": {
     "@types/node": "^24.0.15",
     "@vitest/browser": "^3.2.4",

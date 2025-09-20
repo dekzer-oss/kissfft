@@ -1,4 +1,3 @@
-// src/index.ts
 export {
   createKissFft,
   createKissRealFft,
@@ -17,6 +16,3 @@ export type {
   KissFftNdInstance,
   KissFftNdRealInstance,
 } from './types';
-
-// IMPORTANT: do NOT export loader.browser / loader.node here.
-// Keep them as subpath entrypoints only (see package.json "exports").

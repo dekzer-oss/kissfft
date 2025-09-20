@@ -1,6 +1,8 @@
 /**
- * Node loader: keeps node:* imports, reads WASM from dist/ by default.
+ * Node loader: always reads WASM from ../build.
+ * Normalizes Buffer/Uint8Array → ArrayBuffer for Emscripten.
  */
+
 import { readFile as nodeReadFile } from 'node:fs/promises';
 import createSimdModuleUntyped from '../build/kissfft-wasm-simd.js';
 import createScalarModuleUntyped from '../build/kissfft-wasm.js';
@@ -10,6 +12,7 @@ interface EmscriptenInit {
   locateFile?: (path: string, prefix: string) => string;
   wasmBinary?: ArrayBuffer | Uint8Array;
 }
+
 type ModuleFactory = (opts: EmscriptenInit) => Promise<KissFftWasmModule>;
 const createSimdModule = createSimdModuleUntyped as ModuleFactory;
 const createScalarModule = createScalarModuleUntyped as ModuleFactory;
@@ -17,36 +20,64 @@ const createScalarModule = createScalarModuleUntyped as ModuleFactory;
 export interface NodeLoaderOptions {
   /** Force SIMD selection (skips feature detection). */
   preferSimd?: boolean;
-  /** Override WASM file locations (absolute fs path or file: URL). */
+  /** Optional absolute fs path or file: URL to the WASM file. */
   wasmPaths?: {
     simd?: string | URL;
     scalar?: string | URL;
   };
-  /** Custom reader for testing/sandboxed FS. Defaults to fs.promises.readFile. */
+  /** Custom reader for tests/sandbox. Defaults to fs.promises.readFile. */
   readFile?: (path: string | URL) => Promise<Uint8Array>;
 }
 
-/**
- * Loads the KISS FFT WASM module in Node with strict typing.
- * Name matches internal imports: `import { loadKissFft } from '@/loader'`.
- */
-export async function loadKissFft(
-  opts?: NodeLoaderOptions
-): Promise<KissFftWasmModule> {
-  const wantSimd = !!opts?.preferSimd;
-  const readFile = opts?.readFile ?? (p => nodeReadFile(p) as unknown as Promise<Uint8Array>);
+type Flavor = 'scalar' | 'simd';
+const FILENAME: Record<Flavor, string> = {
+  scalar: 'kissfft-wasm.wasm',
+  simd: 'kissfft-wasm-simd.wasm',
+};
 
-  if (wantSimd) {
-    const wasmUrl = opts?.wasmPaths?.simd ?? new URL('./kissfft-wasm-simd.wasm', import.meta.url);
-    const wasm = await readFile(wasmUrl);
-    return createSimdModule({ wasmBinary: wasm });
-  }
-
-  const wasmUrl = opts?.wasmPaths?.scalar ?? new URL('./kissfft-wasm.wasm', import.meta.url);
-  const wasm = await readFile(wasmUrl);
-  return createScalarModule({ wasmBinary: wasm });
+function toArrayBuffer(view: ArrayBuffer | Uint8Array): ArrayBuffer {
+  if (view instanceof ArrayBuffer) return view;
+  const { buffer, byteOffset, byteLength } = view;
+  return buffer.slice(byteOffset, byteOffset + byteLength) as ArrayBuffer;
 }
 
-// Optional alias for compatibility with earlier naming
-export const loadKissfftWasmNode = loadKissFft;
+function defaultUrl(flavor: Flavor): URL {
+  return new URL(`../build/${FILENAME[flavor]}`, import.meta.url);
+}
+
+async function readBytes(
+  readFile: (p: string | URL) => Promise<Uint8Array>,
+  flavor: Flavor,
+  override?: string | URL,
+): Promise<ArrayBuffer> {
+  const target = override ?? defaultUrl(flavor);
+  try {
+    const bytes = await readFile(target);
+    return toArrayBuffer(bytes);
+  } catch (e: any) {
+    const where = target instanceof URL ? target.href : String(target);
+    if (e?.code === 'ENOENT') {
+      throw new Error(
+        `KISS FFT WASM not found at ${where}. Build the WASM first (e.g., pnpm run build:wasm:both).`,
+      );
+    }
+    throw e;
+  }
+}
+
+async function loadFlavor(
+  flavor: Flavor,
+  opts?: NodeLoaderOptions,
+): Promise<KissFftWasmModule> {
+  const readFile =
+    opts?.readFile ?? ((p) => nodeReadFile(p) as unknown as Promise<Uint8Array>);
+  const wasmBinary = await readBytes(readFile, flavor, opts?.wasmPaths?.[flavor]);
+  return (flavor === 'simd' ? createSimdModule : createScalarModule)({ wasmBinary });
+}
+
+/** Public entry: scalar by default for rock-solid Node; opt-in SIMD via preferSimd. */
+export async function loadKissFft(opts?: NodeLoaderOptions): Promise<KissFftWasmModule> {
+  return opts?.preferSimd ? loadFlavor('simd', opts) : loadFlavor('scalar', opts);
+}
+
 export type { KissFftWasmModule } from './types';

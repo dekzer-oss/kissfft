@@ -53,6 +53,4 @@ export async function loadKissFft(
   });
 }
 
-// Optional alias for power users who saw earlier naming
-export const loadKissfftWasm = loadKissFft;
 export type { KissFftWasmModule } from './types';

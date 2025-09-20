@@ -3,7 +3,7 @@ import { nextFastSize } from '@/index';
 
 describe('nextFastSize', () => {
   it('is monotonic and >= n', async () => {
-    const vals = [1,2,3,7,15,16,17,31,32,33,255,256,257];
+    const vals = [1, 2, 3, 7, 15, 16, 17, 31, 32, 33, 255, 256, 257];
     for (const n of vals) {
       const m = await nextFastSize(n);
       expect(m).toBeGreaterThanOrEqual(n);

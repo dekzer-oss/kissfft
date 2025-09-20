@@ -6,9 +6,7 @@
     "src/wasm/kiss_fftnd.c",
     "src/wasm/kiss_fftndr.c"
   ],
-  "includes": [
-    "src/wasm"
-  ],
+  "includes": ["src/wasm"],
   "cflags": [
     "-std=c11",
     "-O3",

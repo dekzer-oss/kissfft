@@ -128,9 +128,9 @@ export async function createKissNdRealFft(
       // compute the real output into the REAL region (inIdx).
       mod.HEAPF32.set(input, outIdx);
       mod._kiss_fftndri(
-        pair!.inv,  // inverse ND real plan
-        outPtr,     // freqdata: PACKED buffer (packedLen floats)
-        inPtr,      // timedata: REAL buffer (size floats)
+        pair!.inv, // inverse ND real plan
+        outPtr, // freqdata: PACKED buffer (packedLen floats)
+        inPtr, // timedata: REAL buffer (size floats)
       );
 
       // Read back and normalize.

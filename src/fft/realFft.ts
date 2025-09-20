@@ -84,9 +84,9 @@ export async function createKissRealFft(
       // compute the real output into the REAL region (inIdx).
       mod.HEAPF32.set(hspec, outIdx);
       mod._kiss_fftri(
-        pair!.inv,   // inverse plan (real)
-        outPtr,      // freqdata: PACKED buffer (N + 2 floats)
-        inPtr,       // timedata: REAL buffer (N floats)
+        pair!.inv, // inverse plan (real)
+        outPtr, // freqdata: PACKED buffer (N + 2 floats)
+        inPtr, // timedata: REAL buffer (N floats)
       );
 
       // Read back real data and apply 1/N normalization.

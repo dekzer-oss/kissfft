@@ -1,5 +1,5 @@
 import { loadKissFft } from '@/loader';
-import { cleanupCache, planCache} from './cache';
+import { cleanupCache, planCache } from './cache';
 import type { KissFftWasmModule } from '@/types';
 
 type KissFftWasmModuleWithCleanup = KissFftWasmModule & {
@@ -29,4 +29,4 @@ export async function cleanupKissFft(): Promise<void> {
   }
 }
 
-export {getCacheStats} from './cache';
+export { getCacheStats } from './cache';

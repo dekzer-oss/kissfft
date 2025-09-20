@@ -60,9 +60,15 @@
   },
   "typesVersions": {
     "*": {
-      "browser": ["dist/browser.d.ts"],
-      "node": ["dist/node.d.ts"],
-      "preload": ["dist/preload.d.ts"]
+      "browser": [
+        "dist/browser.d.ts"
+      ],
+      "node": [
+        "dist/node.d.ts"
+      ],
+      "preload": [
+        "dist/preload.d.ts"
+      ]
     }
   },
   "unpkg": "dist/dekzer-kissfft.umd.js",

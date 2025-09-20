@@ -23,7 +23,10 @@ export default defineConfig({
     rollupOptions: {
       external: (id) =>
         id.startsWith('node:') ||
-        id === 'fs' || id === 'path' || id === 'module' || id === 'url' ||
+        id === 'fs' ||
+        id === 'path' ||
+        id === 'module' ||
+        id === 'url' ||
         id.includes('/build/node/dekzer-kissfft'),
       output: {
         entryFileNames: 'node.js',

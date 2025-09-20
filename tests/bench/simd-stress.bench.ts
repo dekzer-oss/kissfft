@@ -13,7 +13,9 @@ beforeAll(async () => {
   const inPtr = wasm._malloc(16 * 2 * 4);
   const outPtr = wasm._malloc(16 * 2 * 4);
   wasm._kiss_fft(cfg, inPtr, outPtr);
-  wasm._free(inPtr); wasm._free(outPtr); wasm._free(cfg);
+  wasm._free(inPtr);
+  wasm._free(outPtr);
+  wasm._free(cfg);
 });
 
 type Case = {
@@ -36,7 +38,7 @@ function ensureCase(nfft: number, inverse: boolean): Case {
 
   if (!wasm) throw new Error('WASM module not loaded yet');
 
-  const complexElems = nfft * 2;            // interleaved [re, im, re, im...]
+  const complexElems = nfft * 2; // interleaved [re, im, re, im...]
   const bytes = complexElems * 4;
 
   const cfgPtr = wasm._kiss_fft_alloc(nfft, inverse ? 1 : 0, 0, 0);
@@ -48,7 +50,7 @@ function ensureCase(nfft: number, inverse: boolean): Case {
   // Pre-fill a sine into interleaved input ONCE.
   for (let i = 0; i < nfft; i++) {
     input[i * 2] = Math.sin((2 * Math.PI * i) / nfft); // re
-    input[i * 2 + 1] = 0;                              // im
+    input[i * 2 + 1] = 0; // im
   }
 
   const BATCH = 16; // amortize JS→WASM boundary
@@ -79,6 +81,6 @@ const SIZES = [128, 512, 2048, 8192, 32768];
 describe('KissFFT kernel stress (complex, interleaved)', () => {
   for (const n of SIZES) {
     bench(`complex forward N=${n}`, () => ensureCase(n, false).run(), { time: 500 });
-    bench(`complex inverse N=${n}`, () => ensureCase(n, true).run(),  { time: 500 });
+    bench(`complex inverse N=${n}`, () => ensureCase(n, true).run(), { time: 500 });
   }
 });

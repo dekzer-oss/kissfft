@@ -35,21 +35,25 @@ async function loadVia(baseName: string): Promise<KissFftWasmModule> {
     wasmBinary = await readFile(wasmPath);
   } catch (err) {
     const where = `\nMissing wasm at: ${wasmPath}`;
-    const hint =
-      `\nHint: setKissFftNodeAssetDir('/abs/path/to/build/node') or export DEKZER_KISSFFT_DIR=/abs/path`;
-    throw new Error(`dekzer-kissfft: failed to read wasm (${baseName})${where}${hint}\nOriginal: ${String(err)}`);
+    const hint = `\nHint: setKissFftNodeAssetDir('/abs/path/to/build/node') or export DEKZER_KISSFFT_DIR=/abs/path`;
+    throw new Error(
+      `dekzer-kissfft: failed to read wasm (${baseName})${where}${hint}\nOriginal: ${String(err)}`,
+    );
   }
 
   const glueMod = await import(pathToFileURL(gluePath).href);
-  const createModule = (glueMod.default ?? glueMod) as (opts: any) => Promise<KissFftWasmModule>;
+  const createModule = (glueMod.default ?? glueMod) as (
+    opts: any,
+  ) => Promise<KissFftWasmModule>;
 
   try {
     return await createModule({ wasmBinary });
   } catch (err) {
     const where = `\nTried glue=${gluePath}\n      wasm=${wasmPath}`;
-    const hint =
-      `\nHint: ensure files exist and match the build profile (SIMD vs scalar) or set DEKZER_KISSFFT_DIR.`;
-    throw new Error(`dekzer-kissfft: failed to initialize (${baseName})${where}${hint}\nOriginal: ${String(err)}`);
+    const hint = `\nHint: ensure files exist and match the build profile (SIMD vs scalar) or set DEKZER_KISSFFT_DIR.`;
+    throw new Error(
+      `dekzer-kissfft: failed to initialize (${baseName})${where}${hint}\nOriginal: ${String(err)}`,
+    );
   }
 }
 

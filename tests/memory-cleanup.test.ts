@@ -37,13 +37,13 @@ const randReal = (N: number, seed = 1): Float32Array => {
 describe('plan‑cache & dispose', () => {
   it('properly disposes and allows recreation (uncached)', async () => {
     const N = 64;
-    let fft = await createKissFft(N,false);
+    let fft = await createKissFft(N, false);
 
     const in1 = randComplex(N, 111);
     const out1 = fft.forward(in1);
     fft.dispose();
 
-    fft = await createKissFft(N,false);
+    fft = await createKissFft(N, false);
     const in2 = randComplex(N, 111);
     const out2 = fft.forward(in2);
     expect(out2).toEqual(out1);

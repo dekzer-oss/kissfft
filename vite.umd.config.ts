@@ -21,7 +21,7 @@ export default defineConfig({
     target: 'es2018',
     minify: 'esbuild',
     rollupOptions: {
-      external: [/^node:/]
+      external: [/^node:/],
     },
   },
 });

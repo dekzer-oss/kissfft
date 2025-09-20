@@ -93,11 +93,10 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test",
-    "test:e2e": "playwright test -c playwright.config.ts",
     "e2e:open": "playwright test -c playwright.config.ts --ui",
     "e2e:browsers": "playwright install --with-deps",
-    "preview:e2e": "pnpm run build && vite preview --host 127.0.0.1 --strictPort --port 4178"
-
+    "preview:e2e": "vite preview --host 127.0.0.1 --strictPort --port 4178",
+    "test:e2e": "pnpm run build && playwright test -c playwright.config.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",

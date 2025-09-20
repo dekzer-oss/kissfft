@@ -16,15 +16,11 @@ export default defineConfig({
   ],
 
   webServer: {
-    // Build the library, then preview the built "dist/" at "/"
+    // Preview only (build is run by the test:e2e script before Playwright starts)
     command: 'pnpm run preview:e2e',
-    // Point to a guaranteed 200 page so Playwright knows it's ready:
+    // Point to a guaranteed 200 so Playwright knows the server is ready
     url: 'http://127.0.0.1:4178/fixtures/umd-basic.html',
     reuseExistingServer: false,
-    gracefulShutdown: {
-      signal: 'SIGINT',
-      timeout: 60_000,
-    },
     timeout: 60_000,
   },
 });

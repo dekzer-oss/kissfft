@@ -13,6 +13,12 @@ if (existsSync(wasmSrc)) {
 
 export default defineConfig({
   test: {
+    coverage: {
+      provider: 'v8',
+      reportsDirectory: 'coverage/unit',
+      reporter: ['text', 'html', 'lcov'],
+      exclude: ['tests/**', 'dist/**', 'build/**', 'emcripten/**'],
+    },
     projects: [
       {
         plugins: [viteTsConfigPaths()],

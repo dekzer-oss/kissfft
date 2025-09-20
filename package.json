@@ -27,13 +27,13 @@
     "access": "public"
   },
   "files": [
-    "dist/**",
-    "build/web/*",
-    "build/node/*",
+    "dist/*.js",
+    "dist/*.d.ts",
+    "dist/*.map",
+    "dist/*.wasm",
     "LICENSE",
     "NOTICE",
-    "THIRD_PARTY_LICENSES/**",
-    "README.md"
+    "THIRD_PARTY_LICENSES/**"
   ],
   "main": "./dist/kissfft.node.esm.js",
   "module": "./dist/kissfft.esm.js",

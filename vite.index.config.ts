@@ -2,7 +2,6 @@ import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
@@ -12,7 +11,7 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       formats: ['es'],
-      fileName: () => 'index.js',
+      fileName: () => 'kissfft.esm.js',
     },
     outDir: 'dist',
     emptyOutDir: false,
@@ -21,9 +20,8 @@ export default defineConfig({
     minify: 'esbuild',
     rollupOptions: {
       output: {
-        inlineDynamicImports: true,
-        entryFileNames: '[name].js',
-        assetFileNames: 'assets/[name]-[hash][extname]',
+        inlineDynamicImports: true,           // 1 file, no code-split hashes
+        assetFileNames: 'assets/[name][extname]', // stable asset names
       },
     },
   },

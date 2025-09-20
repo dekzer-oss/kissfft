@@ -2,7 +2,6 @@ import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
@@ -13,24 +12,22 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/loader.node.ts'),
       formats: ['es'],
-      fileName: () => 'node.js',
+      fileName: () => 'kissfft.node.esm.js',
     },
     outDir: 'dist',
     emptyOutDir: false,
     sourcemap: true,
-    target: 'node18',
+    target: 'es2018',
     minify: 'esbuild',
     rollupOptions: {
       external: (id) =>
         id.startsWith('node:') ||
-        id === 'fs' ||
-        id === 'path' ||
-        id === 'module' ||
-        id === 'url' ||
+        id === 'fs' || id === 'path' || id === 'module' || id === 'url' ||
         id.includes('/build/node/dekzer-kissfft'),
       output: {
-        entryFileNames: 'node.js',
+        entryFileNames: 'kissfft.node.esm.js',
         inlineDynamicImports: true,
+        assetFileNames: 'assets/[name][extname]',
       },
     },
   },

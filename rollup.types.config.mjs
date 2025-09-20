@@ -1,35 +1,30 @@
 import dts from 'rollup-plugin-dts';
+import tsconfigPaths from 'rollup-plugin-tsconfig-paths';
 
-/**
- * Bundle .d.ts for each public entry.
- * We generate:
- *   - dist/index.d.ts
- *   - dist/browser.d.ts
- *   - dist/node.d.ts
- *   - dist/preload.d.ts
- */
-const entries = {
-  index: 'src/index.ts',
-  browser: 'src/loader.browser.ts',
-  node: 'src/loader.node.ts',
-  preload: 'src/preload.ts',
-};
+const plugins = [
+  tsconfigPaths({ tsConfigPath: ['./tsconfig.json'] }),
+  dts({ tsconfig: './tsconfig.json' }),
+];
 
-const plugin = dts({
-  // Make path alias resolution explicit for the dts bundler.
-  compilerOptions: {
-    baseUrl: '.',
-    paths: {
-      '@/*': ['src/*'],
-      '@/types': ['src/types/index.ts'],
-    },
+export default [
+  {
+    input: 'src/index.ts',
+    output: { file: 'dist/index.d.ts', format: 'es' },
+    plugins,
   },
-  respectExternal: true,
-  // noCheck: false, // keep typechecking on during bundle (optional)
-});
-
-export default Object.entries(entries).map(([name, input]) => ({
-  input,
-  output: { file: `dist/${name}.d.ts`, format: 'es' },
-  plugins: [plugin],
-}));
+  {
+    input: 'src/loader.browser.ts',
+    output: { file: 'dist/kissfft.browser.d.ts', format: 'es' },
+    plugins,
+  },
+  {
+    input: 'src/loader.node.ts',
+    output: { file: 'dist/kissfft.node.d.ts', format: 'es' },
+    plugins,
+  },
+  {
+    input: 'src/preload.ts',
+    output: { file: 'dist/kissfft.preload.d.ts', format: 'es' },
+    plugins,
+  },
+];

@@ -2,7 +2,6 @@ import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
@@ -11,9 +10,9 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'DekzerKissfft',
+      name: 'DekzerKissfft',             // keep global name stable
       formats: ['umd'],
-      fileName: () => 'dekzer-kissfft.umd.js',
+      fileName: () => 'kissfft.umd.js',  // <-- match package.json `unpkg/jsdelivr`
     },
     outDir: 'dist',
     emptyOutDir: false,

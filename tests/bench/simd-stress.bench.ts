@@ -1,14 +1,10 @@
-// tests/bench/simd-stress.bench.ts
-import { bench, describe, beforeAll, afterAll } from 'vitest';
+import { afterAll, beforeAll, bench, describe } from 'vitest';
 import { type KissFftWasmModule, loadKissFft } from '../../src';
 
 let wasm: KissFftWasmModule | null = null;
 
 beforeAll(async () => {
-  // If you add a { preferSimd: true } flag later, pass it here.
   wasm = await loadKissFft();
-
-  // Warm up tiny path so link/JIT costs don’t pollute first sample.
   const cfg = wasm._kiss_fft_alloc(16, 0, 0, 0);
   const inPtr = wasm._malloc(16 * 2 * 4);
   const outPtr = wasm._malloc(16 * 2 * 4);
@@ -47,16 +43,14 @@ function ensureCase(nfft: number, inverse: boolean): Case {
 
   const input = new Float32Array(wasm.HEAPF32.buffer, inputPtr, complexElems);
 
-  // Pre-fill a sine into interleaved input ONCE.
   for (let i = 0; i < nfft; i++) {
-    input[i * 2] = Math.sin((2 * Math.PI * i) / nfft); // re
-    input[i * 2 + 1] = 0; // im
+    input[i * 2] = Math.sin((2 * Math.PI * i) / nfft);
+    input[i * 2 + 1] = 0;
   }
 
-  const BATCH = 16; // amortize JS→WASM boundary
+  const BATCH = 16;
 
   const run = () => {
-    // wasm! is safe here; bench callbacks run after beforeAll.
     for (let t = 0; t < BATCH; t++) wasm!._kiss_fft(cfgPtr, inputPtr, outputPtr);
   };
 

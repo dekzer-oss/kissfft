@@ -1,4 +1,3 @@
-// tests/bench/fft.bench.ts
 import { afterAll, beforeAll, bench } from 'vitest';
 import { cleanupKissFft, createKissFft } from '@/fft';
 

@@ -1,5 +1,5 @@
 import { bench, describe } from 'vitest';
-import { createKissFft, createKissRealFft } from '@/index';
+import { createKissFft, createKissRealFft } from '@/fft';
 
 const COMPLEX_SIZES = [64, 256, 1024, 4096] as const;
 const REAL_SIZES = [64, 256, 1024, 4096] as const;

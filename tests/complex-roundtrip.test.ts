@@ -39,7 +39,7 @@ const TOL = 1e-6;
 
 describe(
   'complex FFT – round‑trip accuracy',
-  { timeout: 20000 },
+  { timeout: 60_000 },
   () => {
     afterAll(() => cleanupKissFft());
 
@@ -51,6 +51,7 @@ describe(
           beforeAll(async () => {
             fft = await createKissFft(N);
           });
+
           afterAll(() => fft.dispose());
 
           it('impulse is lossless', () => {

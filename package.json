@@ -52,16 +52,17 @@
     "./node": {
       "types": "./dist/node.d.ts",
       "default": "./dist/node.js"
+    },
+    "./preload": {
+      "types": "./dist/preload.d.ts",
+      "default": "./dist/preload.js"
     }
   },
   "typesVersions": {
     "*": {
-      "browser": [
-        "dist/browser.d.ts"
-      ],
-      "node": [
-        "dist/node.d.ts"
-      ]
+      "browser": ["dist/browser.d.ts"],
+      "node": ["dist/node.d.ts"],
+      "preload": ["dist/preload.d.ts"]
     }
   },
   "unpkg": "dist/dekzer-kissfft.umd.js",

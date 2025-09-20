@@ -1,38 +1,35 @@
-// rollup.types.config.mjs
 import dts from 'rollup-plugin-dts';
 
+/**
+ * Bundle .d.ts for each public entry.
+ * We generate:
+ *   - dist/index.d.ts
+ *   - dist/browser.d.ts
+ *   - dist/node.d.ts
+ *   - dist/preload.d.ts
+ */
 const entries = {
   index: 'src/index.ts',
   browser: 'src/loader.browser.ts',
   node: 'src/loader.node.ts',
+  preload: 'src/preload.ts',
 };
 
-export default {
-  input: entries,
-  output: {
-    dir: 'dist',
-    format: 'es',
-    entryFileNames: '[name].d.ts',
-    chunkFileNames: 'types/[name].d.ts',
+const plugin = dts({
+  // Make path alias resolution explicit for the dts bundler.
+  compilerOptions: {
+    baseUrl: '.',
+    paths: {
+      '@/*': ['src/*'],
+      '@/types': ['src/types/index.ts'],
+    },
   },
-  plugins: [
-    dts({
-      respectExternal: true,
-      compilerOptions: {
-        stripInternal: true,
-        declaration: true,
-        emitDeclarationOnly: true,
-        skipLibCheck: true,
-        baseUrl: '.',
-        paths: { '@/*': ['src/*'] },
-      },
-      exclude: [
-        'src/**/*.test.*',
-        'src/**/__tests__/**',
-        'src/**/__mocks__/**',
-        'src/**/fixtures/**',
-      ],
-    }),
-  ],
-  external: [/^node:/],
-};
+  respectExternal: true,
+  // noCheck: false, // keep typechecking on during bundle (optional)
+});
+
+export default Object.entries(entries).map(([name, input]) => ({
+  input,
+  output: { file: `dist/${name}.d.ts`, format: 'es' },
+  plugins: [plugin],
+}));

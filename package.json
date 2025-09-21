@@ -13,7 +13,7 @@
   "homepage": "https://github.com/dekzer-oss/kissfft#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dekzer-oss/kissfft.git"
+    "url": "git+https://github.com/dekzer-oss/kissfft.git"
   },
   "bugs": {
     "url": "https://github.com/dekzer-oss/kissfft/issues"
@@ -31,6 +31,8 @@
     "dist/*.d.ts",
     "dist/*.map",
     "dist/*.wasm",
+    "build/web/*.{js,wasm}",
+    "build/node/*.{js,wasm}",
     "LICENSE",
     "NOTICE",
     "THIRD_PARTY_LICENSES/**"
@@ -79,11 +81,8 @@
     "build:wasm:perf": "node emcripten/build.mjs --both --env=both --profile=perf",
     "build:wasm:size": "node emcripten/build.mjs --both --env=both --profile=size",
     "build:wasm:both": "node emcripten/build.mjs --both --env=both",
-    "rebuild:wasm": "node emcripten/build.mjs --both --env=both --force",
-    "build:wasm:nocache": "node emcripten/build.mjs --both --env=both --no-cache",
     "prebuild": "pnpm run build:wasm:perf",
-    "build": "vite build -c vite.index.config.ts && vite build -c vite.es.config.ts && vite build -c vite.node.config.ts && vite build -c vite.umd.config.ts && rollup -c rollup.types.config.mjs && rimraf dist/types",
-    "pretest": "pnpm run build:wasm:both || true",
+    "build": "vite build -c vite.index.config.ts && vite build -c vite.es.config.ts && vite build -c vite.node.config.ts && vite build -c vite.umd.config.ts && (node -e \"const fs=require('fs');const f=['dist/index.d.ts','dist/kissfft.browser.d.ts','dist/kissfft.node.d.ts','dist/kissfft.preload.d.ts'];if(process.env.FORCE_TYPES==='1'){process.exit(1)}process.exit(f.every(p=>fs.existsSync(p))?0:1)\" || rollup -c rollup.types.config.mjs) && rimraf dist/types",
     "test": "vitest run --reporter=verbose",
     "test:node": "vitest run --project=node",
     "test:browser": "vitest run --project=browser",
@@ -92,16 +91,19 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "prepublishOnly": "pnpm run clean && pnpm run build && pnpm run test",
+    "prepublishOnly": "pnpm run clean && FORCE_TYPES=1 pnpm run build && pnpm run test",
     "e2e:open": "playwright test -c playwright.config.ts --ui",
     "e2e:browsers": "playwright install --with-deps",
     "preview:e2e": "vite preview --host 127.0.0.1 --strictPort --port 4178",
-    "test:e2e": "pnpm run build && playwright test -c playwright.config.ts"
+    "test:e2e": "pnpm run build && playwright test -c playwright.config.ts",
+    "test:cov": "vitest run --coverage",
+    "ci:unit": "vitest run --coverage --reporter=dot"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0",
     "@types/node": "^24.0.15",
     "@vitest/browser": "^3.2.4",
+    "@vitest/coverage-v8": "3.2.4",
     "eslint": "^9.31.0",
     "prettier": "^4.0.0-alpha.12",
     "rimraf": "^6.0.1",
@@ -109,6 +111,7 @@
     "rollup-plugin-copy": "^3.5.0",
     "rollup-plugin-dts": "^6.2.1",
     "rollup-plugin-tsconfig-paths": "^1.5.2",
+    "sirv-cli": "^3.0.1",
     "typescript": "^5.8.3",
     "vite": "7.1.5",
     "vite-tsconfig-paths": "^5.1.4",

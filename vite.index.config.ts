@@ -20,8 +20,8 @@ export default defineConfig({
     minify: 'esbuild',
     rollupOptions: {
       output: {
-        inlineDynamicImports: true,           // 1 file, no code-split hashes
-        assetFileNames: 'assets/[name][extname]', // stable asset names
+        inlineDynamicImports: true,
+        assetFileNames: 'assets/[name][extname]',
       },
     },
   },

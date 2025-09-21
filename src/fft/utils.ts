@@ -1,5 +1,3 @@
-// src/fft/utils.ts
-
 /** Size of a 32-bit float in bytes */
 export const BYTES_F32 = Float32Array.BYTES_PER_ELEMENT;
 
@@ -10,7 +8,6 @@ export function isValidPointer(ptr: number | undefined): boolean {
 
 /** Convert a byte pointer to an index in HEAPF32 */
 export function toF32(ptr: number): number {
-  // Float32Array element is 4 bytes → shift right by 2
   return ptr >>> 2;
 }
 
@@ -49,7 +46,6 @@ export function handleOddLengthRealFft(data: Float32Array): {
 } {
   const originalLength = data.length | 0;
 
-  // Even: identity.
   if ((originalLength & 1) === 0) {
     return {
       paddedData: data,
@@ -58,7 +54,6 @@ export function handleOddLengthRealFft(data: Float32Array): {
     };
   }
 
-  // Odd: pad by one with a zero.
   const paddedData = new Float32Array(originalLength + 1);
   paddedData.set(data);
   paddedData[originalLength] = 0;
@@ -82,7 +77,6 @@ export function nextFastShape(
     throw new Error('nextFastShape: shape must be a non-empty array');
   }
 
-  // Support both sync and async nextFastSize without forcing async.
   const maybePromises = shape.map((dim, i) => {
     const d = dim | 0;
     if (d <= 0) throw new Error(`nextFastShape: invalid dim at index ${i}: ${d}`);
@@ -95,9 +89,6 @@ export function nextFastShape(
   }
   return Promise.all(maybePromises as Promise<number>[]);
 }
-
-// ----- in src/fft/utils.ts -----
-// keep your other exports above (BYTES_F32, isValidPointer, toF32, checkAllocation, etc.)
 
 /** Metadata describing one attempted allocation. */
 export interface AllocationSpec {
@@ -118,12 +109,11 @@ export function safeMemoryAllocation(
     _free: (ptr: number) => void;
   },
   allocations: ReadonlyArray<AllocationSpec>,
-  context?: string, // ← new optional parameter
+  context?: string,
 ): void {
   const failed = allocations.find((a) => !isValidPointer(a.ptr));
   if (!failed) return;
 
-  // Best-effort cleanup of those that did succeed
   for (const a of allocations) {
     if (isValidPointer(a.ptr)) {
       try {
@@ -134,7 +124,6 @@ export function safeMemoryAllocation(
     }
   }
 
-  // Nice, compact diagnostics
   const details = allocations
     .map((a) => {
       const tag = a.label ? `${a.label}:` : '';

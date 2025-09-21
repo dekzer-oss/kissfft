@@ -1,11 +1,10 @@
-// vite.umd.config.ts
-import { defineConfig, type Plugin } from 'vite'
-import tsconfigPaths from 'vite-tsconfig-paths'
-import { dirname, resolve, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { promises as fs } from 'node:fs'
+import { defineConfig, type Plugin } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { promises as fs } from 'node:fs';
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
  * Emit ESM alias files that ALWAYS provide a default export (namespace bag)
@@ -14,23 +13,24 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
  * MDN/docs: export vs re-export default semantics.
  */
 function emitEsmAliases(options?: {
-  outDir?: string
-  aliases?: Array<{ fileBase: string; targetBase: string }>
+  outDir?: string;
+  aliases?: Array<{ fileBase: string; targetBase: string }>;
 }): Plugin {
-  const outDir = options?.outDir ?? resolve(__dirname, 'dist')
-  const aliases =
-    options?.aliases ??
-    [
-      { fileBase: 'kissfft.browser.esm', targetBase: 'loader.browser' },
-      { fileBase: 'kissfft.node.esm', targetBase: 'loader.node' },
-    ]
+  const outDir = options?.outDir ?? resolve(__dirname, 'dist');
+  const aliases = options?.aliases ?? [
+    {
+      fileBase: 'kissfft.browser.esm',
+      targetBase: 'loader.browser',
+    },
+    { fileBase: 'kissfft.node.esm', targetBase: 'loader.node' },
+  ];
 
   return {
     name: 'emit-esm-aliases',
     apply: 'build',
     enforce: 'post',
     async writeBundle() {
-      await fs.mkdir(outDir, { recursive: true })
+      await fs.mkdir(outDir, { recursive: true });
       await Promise.all(
         aliases.flatMap(({ fileBase, targetBase }) => {
           const js = [
@@ -40,7 +40,7 @@ function emitEsmAliases(options?: {
             `export default api;`,
             `export * from './${targetBase}.js';`,
             ``,
-          ].join('\n')
+          ].join('\n');
 
           const dts = [
             `// Auto-generated alias types: ${fileBase}.d.ts -> ${targetBase}.d.ts`,
@@ -48,16 +48,16 @@ function emitEsmAliases(options?: {
             `declare const _default: typeof import('./${targetBase}');`,
             `export default _default;`,
             ``,
-          ].join('\n')
+          ].join('\n');
 
           return [
             fs.writeFile(join(outDir, `${fileBase}.js`), js, 'utf8'),
             fs.writeFile(join(outDir, `${fileBase}.d.ts`), dts, 'utf8'),
-          ]
+          ];
         }),
-      )
+      );
     },
-  }
+  };
 }
 
 /**
@@ -65,43 +65,37 @@ function emitEsmAliases(options?: {
  * via the test server at /dist/*. This avoids 404s when Playwright only
  * serves dist/ but your blobs live in build/ (or build/web/).
  */
-function copyWasmAssets(options?: {
-  from?: string[]
-  toDir?: string
-}): Plugin {
-  const toDir = options?.toDir ?? resolve(__dirname, 'dist')
-  const fromGlobs =
-    options?.from ??
-    [
-      // common outputs you’ve shown in logs/trees:
-      resolve(__dirname, 'build/dekzer-kissfft.wasm'),
-      resolve(__dirname, 'build/dekzer-kissfft-simd.wasm'),
-      resolve(__dirname, 'build/web/dekzer-kissfft.wasm'),
-      resolve(__dirname, 'build/web/dekzer-kissfft-simd.wasm'),
-    ]
+function copyWasmAssets(options?: { from?: string[]; toDir?: string }): Plugin {
+  const toDir = options?.toDir ?? resolve(__dirname, 'dist');
+  const fromGlobs = options?.from ?? [
+    resolve(__dirname, 'build/dekzer-kissfft.wasm'),
+    resolve(__dirname, 'build/dekzer-kissfft-simd.wasm'),
+    resolve(__dirname, 'build/web/dekzer-kissfft.wasm'),
+    resolve(__dirname, 'build/web/dekzer-kissfft-simd.wasm'),
+  ];
 
   return {
     name: 'copy-wasm-assets-into-dist',
     apply: 'build',
     enforce: 'post',
     async writeBundle() {
-      await fs.mkdir(toDir, { recursive: true })
-      const seen = new Set<string>()
+      await fs.mkdir(toDir, { recursive: true });
+      const seen = new Set<string>();
       for (const src of fromGlobs) {
         try {
-          const stat = await fs.stat(src)
-          if (!stat.isFile()) continue
-          const base = src.split('/').pop()!
-          if (seen.has(base)) continue
-          const dst = join(toDir, base)
-          await fs.copyFile(src, dst)
-          seen.add(base)
+          const stat = await fs.stat(src);
+          if (!stat.isFile()) continue;
+          const base = src.split('/').pop()!;
+          if (seen.has(base)) continue;
+          const dst = join(toDir, base);
+          await fs.copyFile(src, dst);
+          seen.add(base);
         } catch {
           // ignore missing variants; at least one pair should exist
         }
       }
     },
-  }
+  };
 }
 
 export default defineConfig({
@@ -110,10 +104,14 @@ export default defineConfig({
     emitEsmAliases({
       outDir: resolve(__dirname, 'dist'),
       aliases: [
-        // Create /dist/loader.browser.js that re-exports ./kissfft.browser.esm.js
-        { fileBase: 'loader.browser', targetBase: 'kissfft.browser.esm' },
-        // Create /dist/loader.node.js that re-exports ./kissfft.node.esm.js
-        { fileBase: 'loader.node',    targetBase: 'kissfft.node.esm' },
+        {
+          fileBase: 'loader.browser',
+          targetBase: 'kissfft.browser.esm'
+        },
+        {
+          fileBase: 'loader.node',
+          targetBase: 'kissfft.node.esm',
+        },
       ],
     }),
     copyWasmAssets(),
@@ -124,12 +122,12 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'DekzerKissfft',            // UMD global name
+      name: 'DekzerKissfft',
       formats: ['umd'],
       fileName: () => 'kissfft.umd.js',
     },
     outDir: 'dist',
-    emptyOutDir: false,                 // preserve other build artifacts
+    emptyOutDir: false,
     sourcemap: true,
     target: 'es2018',
     minify: 'esbuild',
@@ -140,4 +138,4 @@ export default defineConfig({
       },
     },
   },
-})
+});
